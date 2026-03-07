@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>Mobile — Soldier App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Heebo', sans-serif; background: #080a10;
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; padding: 40px 20px; gap: 24px;
+    }
+    .page-title { color: #4a5270; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+    .frames-row { display: flex; gap: 32px; align-items: flex-start; flex-wrap: wrap; justify-content: center; }
+
+    /* ── Phone frame ── */
+    .phone {
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+    }
+    .phone-label { color: #4a5270; font-size: 11px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; }
+    .phone-frame {
+      width: 320px; height: 680px;
+      background: #0f1117; border-radius: 44px;
+      border: 2px solid #1e2333; overflow: hidden;
+      display: flex; flex-direction: column;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+      position: relative;
+    }
+
+    /* Status bar */
+    .status-bar {
+      height: 44px; background: #0f1117; display: flex; align-items: center;
+      justify-content: space-between; padding: 12px 20px 0; flex-shrink: 0;
+    }
+    .status-time { font-size: 13px; font-weight: 700; color: #fff; }
+    .status-icons { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #fff; }
+
+    /* Notch */
+    .notch {
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 110px; height: 28px; background: #080a10; border-radius: 0 0 18px 18px;
+      z-index: 10;
+    }
+
+    /* Screen content */
+    .screen { flex: 1; overflow-y: auto; overflow-x: hidden; }
+    .screen::-webkit-scrollbar { display: none; }
+
+    /* Bottom nav */
+    .bottom-nav {
+      height: 72px; background: #151820; border-top: 1px solid #1e2333;
+      display: flex; align-items: flex-start; justify-content: space-around;
+      padding-top: 8px; flex-shrink: 0;
+    }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; min-width: 52px; }
+    .nav-icon { font-size: 20px; line-height: 1; }
+    .nav-label { font-size: 9px; font-weight: 600; color: #4a5270; }
+    .nav-item.active .nav-label { color: #3b82f6; }
+    .nav-item.active .nav-icon { filter: none; }
+    .nav-badge { position: relative; }
+    .nav-badge::after { content: '2'; position: absolute; top: -4px; left: -6px; background: #ef4444; color: #fff; font-size: 8px; font-weight: 700; border-radius: 8px; padding: 0 4px; min-width: 14px; text-align: center; }
+
+    /* ── Shared components ── */
+    .screen-header {
+      padding: 16px 18px 10px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .screen-header h2 { font-size: 20px; font-weight: 800; color: #fff; }
+    .avatar-btn { width: 34px; height: 34px; border-radius: 50%; background: #1d3557; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #7eb8f7; }
+
+    /* ─────────────────────────────────────────
+       SCREEN 1: HOME
+    ───────────────────────────────────────── */
+    .greeting { padding: 6px 18px 12px; }
+    .greeting-hello { font-size: 13px; color: #4a5270; }
+    .greeting-name  { font-size: 22px; font-weight: 800; color: #fff; line-height: 1.1; }
+
+    /* Next task hero card */
+    .next-task-card {
+      margin: 0 14px 14px; border-radius: 18px; overflow: hidden;
+      background: linear-gradient(135deg, #1a2d5a 0%, #0f1a38 100%);
+      border: 1px solid #2a3d70; padding: 16px;
+    }
+    .ntc-label { font-size: 10px; font-weight: 700; color: #60a5fa; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+    .ntc-name  { font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 2px; }
+    .ntc-time  { font-size: 13px; color: #7a9acc; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    .ntc-role-chip { font-size: 10px; font-weight: 700; background: #2a3d70; color: #93c5fd; border-radius: 4px; padding: 2px 7px; }
+    .ntc-countdown {
+      background: rgba(255,255,255,0.06); border-radius: 12px; padding: 10px 14px;
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
+    }
+    .ntc-ct-label { font-size: 11px; color: #60a5fa; }
+    .ntc-ct-value { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+    .ntc-ct-unit  { font-size: 10px; color: #60a5fa; text-align: center; }
+    .ntc-ct-group { text-align: center; }
+    .ntc-ct-sep { font-size: 22px; font-weight: 300; color: #2a3d70; padding-bottom: 8px; }
+    .ntc-alarms { display: flex; gap: 6px; margin-bottom: 12px; }
+    .alarm-chip { font-size: 10px; font-weight: 700; border-radius: 6px; padding: 3px 8px; display: flex; align-items: center; gap: 3px; }
+    .alarm-on  { background: #1c3a2a; color: #4ade80; border: 1px solid #166534; }
+    .alarm-off { background: #1e2333; color: #4a5270; border: 1px solid #2a3045; }
+    .btn-instructions { width: 100%; background: #3b82f6; border: none; border-radius: 10px; padding: 10px; color: #fff; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+
+    /* Today tasks list */
+    .section-label { font-size: 10px; font-weight: 700; color: #4a5270; letter-spacing: 0.07em; text-transform: uppercase; padding: 0 18px 8px; }
+    .today-task-item {
+      margin: 0 14px 6px; background: #151820; border-radius: 12px; padding: 10px 12px;
+      display: flex; align-items: center; gap: 10px; border: 1px solid #1e2333;
+    }
+    .tti-time { font-size: 11px; color: #4a5270; width: 42px; text-align: center; flex-shrink: 0; font-weight: 700; }
+    .tti-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .tti-name { font-size: 13px; font-weight: 600; color: #e0e0e0; flex: 1; }
+    .tti-you  { font-size: 10px; font-weight: 700; background: #1e2d4a; color: #60a5fa; border-radius: 4px; padding: 2px 6px; }
+    .tti-done { text-decoration: line-through; color: #4a5270; }
+
+    /* Events */
+    .event-item { margin: 0 14px 6px; background: #151820; border-radius: 10px; padding: 8px 12px; border: 1px solid #1e2333; border-right: 3px solid #4a5270; }
+    .event-item.alert { border-right-color: #ef4444; }
+    .event-item.info  { border-right-color: #3b82f6; }
+    .event-text { font-size: 12px; color: #b0b8c8; }
+    .event-time { font-size: 10px; color: #4a5270; margin-top: 2px; }
+
+    /* ─────────────────────────────────────────
+       SCREEN 2: TASK DETAIL
+    ───────────────────────────────────────── */
+    .task-detail-header {
+      padding: 16px 18px 12px; display: flex; align-items: center; gap: 10px;
+    }
+    .back-btn { font-size: 20px; color: #7a8ab0; cursor: pointer; }
+    .tdh-title { font-size: 17px; font-weight: 800; color: #fff; flex: 1; }
+
+    .task-detail-hero {
+      margin: 0 14px 14px; background: linear-gradient(135deg, #1a2d5a, #0f1a38);
+      border: 1px solid #2a3d70; border-radius: 16px; padding: 14px;
+    }
+    .tdh-name { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+    .tdh-meta { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+    .tdh-meta-row { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #7a9acc; }
+    .tdh-team { display: flex; gap: -6px; }
+    .team-av { width: 26px; height: 26px; border-radius: 50%; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 2px solid #0f1a38; margin-left: -6px; }
+    .team-av:first-child { margin-left: 0; }
+    .team-count { font-size: 11px; color: #7a9acc; margin-right: 8px; display: flex; align-items: center; }
+
+    .detail-section { padding: 0 14px 14px; }
+    .ds-title { font-size: 11px; font-weight: 700; color: #4a5270; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+    .checklist-item {
+      display: flex; align-items: flex-start; gap: 10px; padding: 8px 0;
+      border-bottom: 1px solid #1e2333; font-size: 13px; color: #b0b8c8;
+    }
+    .checklist-item:last-child { border-bottom: none; }
+    .ci-num { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #2a3045; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #4a5270; flex-shrink: 0; margin-top: 1px; }
+    .ci-num.done { background: #22c55e; border-color: #22c55e; color: #fff; }
+    .ci-text { flex: 1; line-height: 1.4; }
+
+    .equip-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+    .equip-chip { font-size: 11px; background: #1e2333; border: 1px solid #2a3045; border-radius: 6px; padding: 3px 8px; color: #b0b8c8; }
+
+    .notif-toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #151820; border-radius: 10px; border: 1px solid #1e2333; margin-bottom: 6px; }
+    .ntg-label { font-size: 13px; color: #e0e0e0; }
+    .ntg-sub   { font-size: 10px; color: #4a5270; }
+    .toggle { width: 38px; height: 22px; background: #22c55e; border-radius: 11px; position: relative; }
+    .toggle::after { content: ''; position: absolute; top: 3px; left: 18px; width: 16px; height: 16px; background: #fff; border-radius: 50%; }
+    .toggle.off { background: #2a3045; }
+    .toggle.off::after { left: 3px; }
+
+    /* ─────────────────────────────────────────
+       SCREEN 3: COMPANY SCHEDULE
+    ───────────────────────────────────────── */
+    .sched-date-strip {
+      display: flex; gap: 0; overflow-x: auto; padding: 8px 14px; border-bottom: 1px solid #1e2333;
+    }
+    .sched-date-strip::-webkit-scrollbar { display: none; }
+    .sched-dp { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 10px; border-radius: 10px; cursor: pointer; min-width: 44px; }
+    .sched-dp.active { background: #3b82f6; }
+    .sched-dp-day { font-size: 9px; font-weight: 700; color: #4a5270; }
+    .sched-dp.active .sched-dp-day { color: #bfdbfe; }
+    .sched-dp-num { font-size: 16px; font-weight: 800; color: #e0e0e0; line-height: 1; }
+    .sched-dp.active .sched-dp-num { color: #fff; }
+
+    .sched-task-block { margin: 0 14px 8px; border-radius: 12px; overflow: hidden; border: 1px solid #1e2333; }
+    .stb-header { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: #151820; border-bottom: 1px solid #1e2333; }
+    .stb-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .stb-name { font-size: 13px; font-weight: 700; color: #e0e0e0; flex: 1; }
+    .stb-time { font-size: 11px; color: #4a5270; }
+    .stb-soldiers { display: flex; flex-wrap: wrap; gap: 5px; padding: 8px 12px; background: #0f1117; }
+    .stb-soldier { display: flex; align-items: center; gap: 5px; background: #1e2333; border-radius: 6px; padding: 3px 7px; font-size: 11px; }
+    .stb-av { width: 16px; height: 16px; border-radius: 50%; font-size: 7px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+    .stb-sname { color: #b0b8c8; font-weight: 600; }
+    .stb-you { color: #60a5fa; font-weight: 700; }
+    .stb-blocked { background: #3b0d0d; border: 1px solid #7f1d1d; }
+    .stb-warn { border: 1px solid #78350f; }
+
+    /* ─────────────────────────────────────────
+       SCREEN 4: STATUS / LATE
+    ───────────────────────────────────────── */
+    .late-hero {
+      margin: 14px 14px 16px; background: linear-gradient(135deg, #3b0d0d, #1a0808);
+      border: 1px solid #7f1d1d; border-radius: 20px; padding: 20px;
+      display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px;
+    }
+    .late-icon { font-size: 40px; }
+    .late-title { font-size: 20px; font-weight: 800; color: #fff; }
+    .late-sub { font-size: 12px; color: #f87171; line-height: 1.5; }
+    .btn-late {
+      width: 100%; background: #ef4444; border: none; border-radius: 12px; padding: 14px;
+      color: #fff; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer;
+    }
+    .btn-late.sent { background: #166534; }
+    .late-sent-card {
+      margin: 0 14px 12px; background: #0d1f15; border: 1px solid #166534; border-radius: 16px;
+      padding: 14px; display: flex; flex-direction: column; gap: 6px;
+    }
+    .lsc-title { font-size: 13px; font-weight: 700; color: #4ade80; }
+    .lsc-text  { font-size: 12px; color: #86efac; line-height: 1.5; }
+
+    .reason-select {
+      width: 100%; background: #1e2333; border: 1px solid #2a3045; border-radius: 10px;
+      color: #e0e0e0; font-family: inherit; font-size: 13px; padding: 10px 12px; outline: none;
+      margin-bottom: 8px;
+    }
+    .eta-row { display: flex; gap: 8px; margin-bottom: 12px; }
+    .eta-label { font-size: 12px; color: #4a5270; display: flex; align-items: center; }
+    .eta-input { flex: 1; background: #1e2333; border: 1px solid #2a3045; border-radius: 10px; color: #e0e0e0; font-family: inherit; font-size: 14px; font-weight: 700; padding: 8px 12px; outline: none; }
+
+    /* Timeline */
+    .timeline-header { display: flex; gap: 6px; padding: 0 14px 10px; flex-wrap: wrap; }
+    .tl-chip { font-size: 11px; border-radius: 6px; padding: 4px 9px; font-weight: 600; }
+    .tl-present  { background: #1c3a2a; color: #4ade80; }
+    .tl-vacation { background: #1a2a40; color: #60a5fa; }
+    .tl-sick     { background: #3b0d0d; color: #f87171; }
+    .tl-out      { background: #2a2010; color: #fbbf24; }
+
+    .tl-row { margin: 0 14px 8px; background: #151820; border-radius: 10px; border: 1px solid #1e2333; padding: 10px 12px; }
+    .tl-month { font-size: 11px; font-weight: 700; color: #4a5270; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .tl-bar { display: flex; height: 28px; border-radius: 8px; overflow: hidden; gap: 2px; }
+    .tl-seg { display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; }
+    .tls-present  { background: #1c3a2a; color: #4ade80; }
+    .tls-vacation { background: #1a2a40; color: #60a5fa; }
+    .tls-sick     { background: #3b0d0d; color: #f87171; }
+    .tls-out      { background: #2a2010; color: #fbbf24; }
+
+    .vac-summary { margin: 0 14px 10px; background: #151820; border: 1px solid #1e2333; border-radius: 12px; padding: 12px; }
+    .vs-title { font-size: 12px; font-weight: 700; color: #e0e0e0; margin-bottom: 8px; }
+    .vs-bar-wrap { background: #0f1117; border-radius: 6px; height: 10px; overflow: hidden; margin-bottom: 5px; }
+    .vs-bar { height: 100%; border-radius: 6px; background: #3b82f6; }
+    .vs-labels { display: flex; justify-content: space-between; font-size: 10px; color: #4a5270; }
+
+    /* Override pill */
+    .override-banner {
+      margin: 0 14px 10px; background: #150e1a; border: 1px solid #7e22ce; border-radius: 12px;
+      padding: 10px 12px; display: flex; align-items: center; gap: 8px;
+    }
+    .ob-icon { font-size: 16px; }
+    .ob-text { flex: 1; font-size: 12px; color: #c4b5fd; line-height: 1.4; }
+    .ob-badge { font-size: 10px; font-weight: 700; background: #7e22ce; color: #fff; border-radius: 4px; padding: 2px 7px; }
+    /* ── Frame 7 role filter chips ── */
+    .rf7-chip { font-size:10px; font-weight:700; padding:4px 9px; border-radius:14px; border:1px solid #2a3045; background:#1e2333; color:#7a8ab0; cursor:pointer; font-family:inherit; white-space:nowrap; flex-shrink:0; }
+    .rf7-chip.rf7-active { background:#1e2d4a; border-color:#3b82f6; color:#60a5fa; }
+  </style>
+</head>
+<body>
+
+<div class="page-title">Mobile App — Soldier View · Wireframes</div>
+
+<div class="frames-row">
+
+  <!-- ══════════════════════════════
+       PHONE 1 — HOME
+  ══════════════════════════════ -->
+  <div class="phone">
+    <div class="phone-frame">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <span class="status-icons">📶 🔋</span>
+      </div>
+
+      <div class="screen">
+        <div class="screen-header">
+          <div>
+            <div class="greeting-hello">שלום,</div>
+            <div class="greeting-name">דני לוי 👋</div>
+          </div>
+          <div class="avatar-btn">דל</div>
+        </div>
+
+        <!-- Next task hero -->
+        <div class="next-task-card">
+          <div class="ntc-label">המשימה הבאה שלך</div>
+          <div class="ntc-name">סיור 14:00–22:00</div>
+          <div class="ntc-time">
+            <span>14:00 · גבול צפוני</span>
+            <span class="ntc-role-chip">לוחם</span>
+          </div>
+          <div class="ntc-countdown">
+            <div class="ntc-ct-group"><div class="ntc-ct-value">04</div><div class="ntc-ct-unit">שעות</div></div>
+            <div class="ntc-ct-sep">:</div>
+            <div class="ntc-ct-group"><div class="ntc-ct-value">20</div><div class="ntc-ct-unit">דקות</div></div>
+            <div style="flex:1"></div>
+            <div class="ntc-ct-label" style="text-align:left;font-size:10px;line-height:1.4">עד<br>תחילת<br>משימה</div>
+          </div>
+          <div class="ntc-alarms">
+            <span class="alarm-chip alarm-on">🔔 30 דק' לפני</span>
+            <span class="alarm-chip alarm-on">🔔 15 דק' לפני</span>
+            <span class="alarm-chip alarm-on">⏰ אזעקה</span>
+          </div>
+          <button class="btn-instructions">הצג הנחיות ←</button>
+        </div>
+
+        <!-- Today's schedule -->
+        <div class="section-label">לוח היום שלך</div>
+        <div class="today-task-item">
+          <span class="tti-time">06:00</span>
+          <span class="tti-dot" style="background:#4a5270"></span>
+          <span class="tti-name tti-done">סיור 06–14</span>
+        </div>
+        <div class="today-task-item" style="border-color:#2a3d70;background:#0f1520">
+          <span class="tti-time" style="color:#60a5fa">14:00</span>
+          <span class="tti-dot" style="background:#3b82f6"></span>
+          <span class="tti-name">סיור 14–22</span>
+          <span class="tti-you">את/ה</span>
+        </div>
+        <div class="today-task-item">
+          <span class="tti-time">24/7</span>
+          <span class="tti-dot" style="background:#f59e0b"></span>
+          <span class="tti-name">כיתת כוננות</span>
+        </div>
+
+        <!-- Events -->
+        <div class="section-label" style="margin-top:10px">אירועים אחרונים</div>
+        <div class="event-item alert">
+          <div class="event-text">גל מזרחי מאחר לחזור מחופשה</div>
+          <div class="event-time">לפני 12 דקות</div>
+        </div>
+        <div class="event-item info">
+          <div class="event-text">שיבוץ עודכן — רון נחמני הוסף לסיור 14–22</div>
+          <div class="event-time">לפני 34 דקות</div>
+        </div>
+        <div class="event-item">
+          <div class="event-text">כוננות אושרה ל-07.03</div>
+          <div class="event-time">לפני שעתיים</div>
+        </div>
+        <div style="height:16px"></div>
+      </div>
+
+      <div class="bottom-nav">
+        <div class="nav-item active"><span class="nav-icon">🏠</span><span class="nav-label" style="color:#3b82f6">בית</span></div>
+        <div class="nav-item"><span class="nav-icon">📋</span><span class="nav-label">משימות</span></div>
+        <div class="nav-item"><span class="nav-icon nav-badge">🔔</span><span class="nav-label">התראות</span></div>
+        <div class="nav-item"><span class="nav-icon">👤</span><span class="nav-label">פרופיל</span></div>
+      </div>
+    </div>
+    <div class="phone-label">בית</div>
+  </div>
+
+  <!-- ══════════════════════════════
+       PHONE 2 — TASK DETAIL
+  ══════════════════════════════ -->
+  <div class="phone">
+    <div class="phone-frame">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <span class="status-icons">📶 🔋</span>
+      </div>
+
+      <div class="screen">
+        <div class="task-detail-header">
+          <span class="back-btn">←</span>
+          <span class="tdh-title">פרטי משימה</span>
+        </div>
+
+        <div class="task-detail-hero">
+          <div class="tdh-name">סיור 14:00–22:00</div>
+          <div class="tdh-meta">
+            <div class="tdh-meta-row">🕑 <span>14:00 – 22:00 · 8 שעות</span></div>
+            <div class="tdh-meta-row">📍 <span>גבול צפוני — עמדה 7</span></div>
+            <div class="tdh-meta-row">🎖️ <span>תפקידך: לוחם</span></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="tdh-team">
+              <div class="team-av av-p" style="width:26px;height:26px;font-size:9px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;border:2px solid #0f1a38">סל</div>
+              <div class="team-av av-b" style="width:26px;height:26px;font-size:9px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;border:2px solid #0f1a38;margin-left:-8px">דל</div>
+              <div class="team-av av-y" style="width:26px;height:26px;font-size:9px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;border:2px solid #0f1a38;margin-left:-8px;background:#1d3557;color:#7eb8f7">את</div>
+              <div class="team-av av-t" style="width:26px;height:26px;font-size:9px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;border:2px solid #0f1a38;margin-left:-8px">יל</div>
+            </div>
+            <span class="team-count">4 חיילים</span>
+          </div>
+        </div>
+
+        <!-- Notification toggles -->
+        <div style="padding:0 14px 10px">
+          <div class="notif-toggle-row">
+            <div><div class="ntg-label">התראה 30 דקות לפני</div><div class="ntg-sub">🔔 פוש נוטיפיקשן</div></div>
+            <div class="toggle"></div>
+          </div>
+          <div class="notif-toggle-row">
+            <div><div class="ntg-label">התראה 15 דקות לפני</div><div class="ntg-sub">🔔 פוש נוטיפיקשן</div></div>
+            <div class="toggle"></div>
+          </div>
+          <div class="notif-toggle-row">
+            <div><div class="ntg-label">אזעקת השכמה</div><div class="ntg-sub">⏰ צלצול — 30 דק' לפני, גם בשינה</div></div>
+            <div class="toggle"></div>
+          </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="detail-section">
+          <div class="ds-title">הנחיות — תפקיד לוחם</div>
+          <div class="checklist-item">
+            <div class="ci-num done">✓</div>
+            <div class="ci-text">בדיקת נשק ותחמושת לפני יציאה</div>
+          </div>
+          <div class="checklist-item">
+            <div class="ci-num done">✓</div>
+            <div class="ci-text">לבוש מלא כולל אפוד והקסדה</div>
+          </div>
+          <div class="checklist-item">
+            <div class="ci-num">3</div>
+            <div class="ci-text">להתייצב בנקודת מפגש 10 דק' לפני השעה</div>
+          </div>
+          <div class="checklist-item">
+            <div class="ci-num">4</div>
+            <div class="ci-text">פעולה בזוגות — אל תתרחק מהשותף יותר מ-30 מטר</div>
+          </div>
+          <div class="checklist-item">
+            <div class="ci-num">5</div>
+            <div class="ci-text">בממצא חריג — דווח למ"כ מיד. אין לפעול לבד</div>
+          </div>
+        </div>
+
+        <!-- Equipment -->
+        <div class="detail-section">
+          <div class="ds-title">ציוד נדרש</div>
+          <div class="equip-row">
+            <span class="equip-chip">M16</span>
+            <span class="equip-chip">120 כדורים</span>
+            <span class="equip-chip">מים 3L</span>
+            <span class="equip-chip">רדיו</span>
+            <span class="equip-chip">פנס</span>
+            <span class="equip-chip">עזרה ראשונה</span>
+          </div>
+        </div>
+        <div style="height:16px"></div>
+      </div>
+
+      <div class="bottom-nav">
+        <div class="nav-item"><span class="nav-icon">🏠</span><span class="nav-label">בית</span></div>
+        <div class="nav-item active"><span class="nav-icon">📋</span><span class="nav-label" style="color:#3b82f6">משימות</span></div>
+        <div class="nav-item"><span class="nav-icon nav-badge">🔔</span><span class="nav-label">התראות</span></div>
+        <div class="nav-item"><span class="nav-icon">👤</span><span class="nav-label">פרופיל</span></div>
+      </div>
+    </div>
+    <div class="phone-label">פרטי משימה + הנחיות</div>
+  </div>
+
+  <!-- ══════════════════════════════
+       PHONE 3 — COMPANY SCHEDULE
+  ══════════════════════════════ -->
+  <div class="phone">
+    <div class="phone-frame">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <span class="status-icons">📶 🔋</span>
+      </div>
+
+      <div class="screen">
+        <div class="screen-header">
+          <h2>לוח הפלוגה</h2>
+          <div style="font-size:11px;color:#4a5270">07.03.2026</div>
+        </div>
+
+        <!-- Date strip -->
+        <div class="sched-date-strip">
+          <div class="sched-dp"><div class="sched-dp-day">רב</div><div class="sched-dp-num">05</div></div>
+          <div class="sched-dp"><div class="sched-dp-day">חמ</div><div class="sched-dp-num">06</div></div>
+          <div class="sched-dp active"><div class="sched-dp-day">שב</div><div class="sched-dp-num">07</div></div>
+          <div class="sched-dp"><div class="sched-dp-day">א׳</div><div class="sched-dp-num">08</div></div>
+          <div class="sched-dp"><div class="sched-dp-day">ב׳</div><div class="sched-dp-num">09</div></div>
+          <div class="sched-dp"><div class="sched-dp-day">ג׳</div><div class="sched-dp-num">10</div></div>
+          <div class="sched-dp"><div class="sched-dp-day">ד׳</div><div class="sched-dp-num">11</div></div>
+        </div>
+
+        <div style="height:10px"></div>
+
+        <!-- Tasks -->
+        <div class="sched-task-block">
+          <div class="stb-header">
+            <div class="stb-dot" style="background:#22c55e"></div>
+            <div class="stb-name">סיור 06:00–14:00</div>
+            <div class="stb-time">הסתיים ✓</div>
+          </div>
+          <div class="stb-soldiers">
+            <div class="stb-soldier"><div class="stb-av av-b" style="background:#1d3557;color:#7eb8f7">דל</div><span class="stb-sname">דני לוי</span></div>
+            <div class="stb-soldier"><div class="stb-av av-g" style="background:#1c3a2a;color:#4ade80">אב</div><span class="stb-sname">אבי בן דוד</span></div>
+            <div class="stb-soldier stb-warn"><div class="stb-av av-p" style="background:#2d1f54;color:#c4b5fd">גמ</div><span class="stb-sname">גל מזרחי ⚠</span></div>
+            <div class="stb-soldier"><div class="stb-av av-y" style="background:#2a2010;color:#fbbf24">רנ</div><span class="stb-sname">רון נחמני</span></div>
+          </div>
+        </div>
+
+        <div class="sched-task-block" style="border-color:#2a3d70">
+          <div class="stb-header" style="background:#0f1520;border-bottom-color:#2a3d70">
+            <div class="stb-dot" style="background:#3b82f6"></div>
+            <div class="stb-name">סיור 14:00–22:00</div>
+            <div class="stb-time" style="color:#60a5fa">פעיל עכשיו</div>
+          </div>
+          <div class="stb-soldiers" style="background:#0a0f1a">
+            <div class="stb-soldier" style="border:1px solid #2a3d70;background:#1a2a40"><div class="stb-av" style="background:#1d3557;color:#7eb8f7;width:16px;height:16px;font-size:7px;font-weight:700;border-radius:50%;display:flex;align-items:center;justify-content:center">את</div><span class="stb-you">אתה · לוחם</span></div>
+            <div class="stb-soldier"><div class="stb-av av-p" style="background:#2d1f54;color:#c4b5fd">סל</div><span class="stb-sname">סמ"ר לוי</span></div>
+            <div class="stb-soldier"><div class="stb-av av-y" style="background:#2a2010;color:#fbbf24">מכ</div><span class="stb-sname">משה כהן</span></div>
+            <div class="stb-soldier"><div class="stb-av av-t" style="background:#0d2a2a;color:#5eead4">יל</div><span class="stb-sname">יוסי לוי</span></div>
+          </div>
+        </div>
+
+        <div class="sched-task-block">
+          <div class="stb-header">
+            <div class="stb-dot" style="background:#ef4444"></div>
+            <div class="stb-name">כיתת כוננות</div>
+            <div class="stb-time" style="color:#f87171">חסום</div>
+          </div>
+          <div class="stb-soldiers">
+            <div class="stb-soldier"><div class="stb-av av-b" style="background:#1d3557;color:#7eb8f7">דל</div><span class="stb-sname">דני לוי</span></div>
+            <div class="stb-soldier stb-blocked"><div class="stb-av av-r" style="background:#3b0d0d;color:#fca5a5">גמ</div><span class="stb-sname">גל מזרחי ⛔</span></div>
+            <div class="stb-soldier"><div class="stb-av av-g" style="background:#1c3a2a;color:#4ade80">אב</div><span class="stb-sname">אבי בן דוד</span></div>
+            <div class="stb-soldier" style="border:1px dashed #2a3045;color:#4a5270"><span>+ חובש</span></div>
+          </div>
+        </div>
+
+        <div class="sched-task-block">
+          <div class="stb-header">
+            <div class="stb-dot" style="background:#22c55e"></div>
+            <div class="stb-name">מטבח</div>
+            <div class="stb-time">07:00–15:00</div>
+          </div>
+          <div class="stb-soldiers">
+            <div class="stb-soldier"><div class="stb-av av-y" style="background:#2a2010;color:#fbbf24">מכ</div><span class="stb-sname">משה כהן</span></div>
+            <div class="stb-soldier"><div class="stb-av av-t" style="background:#0d2a2a;color:#5eead4">רב</div><span class="stb-sname">רחל ברק</span></div>
+          </div>
+        </div>
+
+        <div style="height:16px"></div>
+      </div>
+
+      <div class="bottom-nav">
+        <div class="nav-item"><span class="nav-icon">🏠</span><span class="nav-label">בית</span></div>
+        <div class="nav-item active"><span class="nav-icon">📅</span><span class="nav-label" style="color:#3b82f6">לוח</span></div>
+        <div class="nav-item"><span class="nav-icon nav-badge">🔔</span><span class="nav-label">התראות</span></div>
+        <div class="nav-item"><span class="nav-icon">👤</span><span class="nav-label">פרופיל</span></div>
+      </div>
+    </div>
+    <div class="phone-label">לוח הפלוגה</div>
+  </div>
+
+  <!-- ══════════════════════════════
+       PHONE 4 — LATE + STATUS
+  ══════════════════════════════ -->
+  <div class="phone">
+    <div class="phone-frame">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <span class="status-icons">📶 🔋</span>
+      </div>
+
+      <div class="screen">
+        <div class="screen-header">
+          <h2>הסטטוס שלי</h2>
+          <div style="font-size:11px;color:#4a5270;text-align:left">07.03.2026</div>
+        </div>
+
+        <!-- Late alert box — active state -->
+        <div class="late-hero">
+          <div class="late-icon">🚨</div>
+          <div class="late-title">אתה מאחר?</div>
+          <div class="late-sub">לחץ כאן כדי להודיע למ"פ שאתה עדיין בדרך — כך שיוכל לשנות שיבוצים בזמן</div>
+          <select class="reason-select">
+            <option>בחר סיבה...</option>
+            <option>תקלת תחבורה</option>
+            <option>עיכוב משפחתי</option>
+            <option>מחלה</option>
+            <option>אחר</option>
+          </select>
+          <div class="eta-row">
+            <span class="eta-label">אגיע בשעה:&nbsp;</span>
+            <input class="eta-input" value="14:45" type="text">
+          </div>
+          <button class="btn-late">📣 אני מאחר — שלח התראה</button>
+        </div>
+
+        <!-- Sent confirmation (shown after press) -->
+        <div class="late-sent-card">
+          <div class="lsc-title">✓ ההתראה נשלחה למ"פ</div>
+          <div class="lsc-text">המ"פ קיבל הודעה ויחליט אם לשנות שיבוצים. תגיע בזמן שהכנסת.</div>
+        </div>
+
+        <!-- Override badge -->
+        <div class="override-banner">
+          <span class="ob-icon">🔒</span>
+          <div class="ob-text"><strong>נעול למשימה</strong><br>שובצת לכוננות 08.03 בין 22:00–06:00 — לא ניתן לשנות ללא אישור מ"פ</div>
+          <span class="ob-badge">נעילת מ"פ</span>
+        </div>
+
+        <!-- Vacation timeline -->
+        <div class="section-label">ניצול חופשה — 2026</div>
+        <div class="timeline-header">
+          <span class="tl-chip tl-present">קיים</span>
+          <span class="tl-chip tl-vacation">חופשה</span>
+          <span class="tl-chip tl-sick">מחלה</span>
+          <span class="tl-chip tl-out">יציאה</span>
+        </div>
+
+        <div class="tl-row">
+          <div class="tl-month">מרץ 2026</div>
+          <div class="tl-bar">
+            <div class="tl-seg tls-present" style="flex:4">קיים</div>
+            <div class="tl-seg tls-vacation" style="flex:2">חופ'</div>
+            <div class="tl-seg tls-present" style="flex:1">קי'</div>
+          </div>
+        </div>
+
+        <div class="vac-summary">
+          <div class="vs-title">ימי חופשה שנוצלו</div>
+          <div class="vs-bar-wrap"><div class="vs-bar" style="width:64%"></div></div>
+          <div class="vs-labels"><span>9 יום מתוך 14</span><span>נשארו 5 ימים</span></div>
+        </div>
+
+        <div style="height:16px"></div>
+      </div>
+
+      <div class="bottom-nav">
+        <div class="nav-item"><span class="nav-icon">🏠</span><span class="nav-label">בית</span></div>
+        <div class="nav-item"><span class="nav-icon">📋</span><span class="nav-label">משימות</span></div>
+        <div class="nav-item"><span class="nav-icon nav-badge">🔔</span><span class="nav-label">התראות</span></div>
+        <div class="nav-item active"><span class="nav-icon">👤</span><span class="nav-label" style="color:#3b82f6">פרופיל</span></div>
+      </div>
+    </div>
+    <div class="phone-label">סטטוס · איחור · נעילה</div>
+  </div>
+
+  <!-- ══════════════════════════════
+       PHONE 5 — COMMANDER MOBILE
+  ══════════════════════════════ -->
+  <div class="phone">
+    <div class="phone-frame">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <span class="status-icons">📶 🔋</span>
+      </div>
+
+      <div class="screen">
+        <div class="screen-header">
+          <div>
+            <div class="greeting-hello">מ"פ</div>
+            <div class="greeting-name">סא"ל כהן</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <div style="width:34px;height:34px;border-radius:50%;background:#3b0d0d;border:1px solid #7f1d1d;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer">🚨</div>
+            <div class="avatar-btn" style="background:#2d1f54;color:#c4b5fd">מפ</div>
+          </div>
+        </div>
+
+        <!-- JUMP alarm — big prominent button -->
+        <div style="margin:0 14px 14px;background:linear-gradient(135deg,#3b0d0d,#1a0808);border:1px solid #7f1d1d;border-radius:20px;padding:16px">
+          <div style="font-size:10px;font-weight:700;color:#f87171;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">כיתת כוננות</div>
+          <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:10px">שלח אזעקת קפיצה</div>
+          <div style="font-size:11px;color:#f87171;margin-bottom:12px;line-height:1.5">לחיצה תשלח התראת חירום לכל חברי הכוננות עם צלצול מלא</div>
+          <button style="width:100%;background:#ef4444;border:none;border-radius:14px;padding:14px;color:#fff;font-family:inherit;font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+            <span style="font-size:20px">🚨</span> קפוץ! כיתת כוננות
+          </button>
+        </div>
+
+        <!-- Alerts that need attention -->
+        <div class="section-label">דורש טיפול</div>
+        <div style="margin:0 14px 8px;background:#150d0d;border:1px solid #7f1d1d;border-radius:12px;padding:10px 12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="font-size:12px;font-weight:700;color:#f87171">גל מזרחי מאחר</div>
+            <div style="font-size:10px;color:#4a5270">לפני 12 דק'</div>
+          </div>
+          <div style="font-size:11px;color:#fca5a5;margin-bottom:8px">מאחר לחזור מחופשה. אמור להיות בסיור 14–22 בעוד 4 שעות</div>
+          <div style="display:flex;gap:6px">
+            <button style="flex:1;background:#1c3a2a;border:1px solid #166534;border-radius:8px;color:#4ade80;font-family:inherit;font-size:11px;font-weight:700;padding:6px;cursor:pointer">ראיתי ✓</button>
+            <button style="flex:1;background:#2a3045;border:1px solid #3a4060;border-radius:8px;color:#e0e0e0;font-family:inherit;font-size:11px;font-weight:700;padding:6px;cursor:pointer">שנה שיבוץ</button>
+          </div>
+        </div>
+
+        <div style="margin:0 14px 8px;background:#150e05;border:1px solid #78350f;border-radius:12px;padding:10px 12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div style="font-size:12px;font-weight:700;color:#fbbf24">כוננות — חובש חסר</div>
+            <div style="font-size:10px;color:#4a5270">עכשיו</div>
+          </div>
+          <div style="font-size:11px;color:#fde68a;margin-bottom:8px">לא שובץ חובש לכיתת כוננות של היום</div>
+          <button style="width:100%;background:#2a2010;border:1px solid #78350f;border-radius:8px;color:#fbbf24;font-family:inherit;font-size:11px;font-weight:700;padding:6px;cursor:pointer">שבץ חובש →</button>
+        </div>
+
+        <!-- Ongoing tasks summary -->
+        <div class="section-label" style="margin-top:6px">משימות פעילות עכשיו</div>
+
+        <div style="margin:0 14px 6px;background:#151820;border:1px solid #1e2333;border-radius:12px;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid #1e2333">
+            <div style="width:8px;height:8px;border-radius:50%;background:#22c55e;flex-shrink:0"></div>
+            <div style="font-size:13px;font-weight:700;color:#e0e0e0;flex:1">סיור 06–14</div>
+            <div style="font-size:10px;color:#4a5270">מסתיים עוד שעה</div>
+          </div>
+          <div style="display:flex;gap:5px;padding:7px 12px;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:4px;background:#1e2333;border-radius:5px;padding:2px 7px;font-size:11px">
+              <div style="width:14px;height:14px;border-radius:50%;background:#1d3557;color:#7eb8f7;font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center">דל</div>
+              <span style="color:#b0b8c8">דני לוי</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:4px;background:#1e2333;border-radius:5px;padding:2px 7px;font-size:11px">
+              <div style="width:14px;height:14px;border-radius:50%;background:#1c3a2a;color:#4ade80;font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center">אב</div>
+              <span style="color:#b0b8c8">אבי בן דוד</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:4px;background:#150e05;border:1px solid #78350f;border-radius:5px;padding:2px 7px;font-size:11px">
+              <div style="width:14px;height:14px;border-radius:50%;background:#2d1f54;color:#c4b5fd;font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center">גמ</div>
+              <span style="color:#fde68a">גל מזרחי ⚠</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin:0 14px 6px;background:#151820;border:1px solid #1e2333;border-radius:12px;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid #1e2333">
+            <div style="width:8px;height:8px;border-radius:50%;background:#22c55e;flex-shrink:0"></div>
+            <div style="font-size:13px;font-weight:700;color:#e0e0e0;flex:1">מטבח</div>
+            <div style="font-size:10px;color:#4a5270">07:00–15:00</div>
+          </div>
+          <div style="display:flex;gap:5px;padding:7px 12px;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:4px;background:#1e2333;border-radius:5px;padding:2px 7px;font-size:11px">
+              <div style="width:14px;height:14px;border-radius:50%;background:#2a2010;color:#fbbf24;font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center">מכ</div>
+              <span style="color:#b0b8c8">משה כהן</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:4px;background:#1e2333;border-radius:5px;padding:2px 7px;font-size:11px">
+              <div style="width:14px;height:14px;border-radius:50%;background:#0d2a2a;color:#5eead4;font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center">רב</div>
+              <span style="color:#b0b8c8">רחל ברק</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick links -->
+        <div class="section-label" style="margin-top:6px">פעולות מהירות</div>
+        <div style="display:flex;gap:8px;padding:0 14px 20px;flex-wrap:wrap">
+          <button style="flex:1;background:#151820;border:1px solid #1e2333;border-radius:10px;color:#e0e0e0;font-family:inherit;font-size:11px;font-weight:700;padding:10px 6px;cursor:pointer;min-width:70px">📋 שיבוץ</button>
+          <button style="flex:1;background:#151820;border:1px solid #1e2333;border-radius:10px;color:#e0e0e0;font-family:inherit;font-size:11px;font-weight:700;padding:10px 6px;cursor:pointer;min-width:70px">👥 חיילים</button>
+          <button style="flex:1;background:#151820;border:1px solid #1e2333;border-radius:10px;color:#e0e0e0;font-family:inherit;font-size:11px;font-weight:700;padding:10px 6px;cursor:pointer;min-width:70px">📊 מצב כ"א</button>
+        </div>
+      </div>
+
+      <div class="bottom-nav">
+        <div class="nav-item active"><span class="nav-icon">🏠</span><span class="nav-label" style="color:#3b82f6">בית</span></div>
+        <div class="nav-item"><span class="nav-icon">📅</span><span class="nav-label">שיבוץ</span></div>
+        <div class="nav-item"><span class="nav-icon nav-badge">🔔</span><span class="nav-label">התראות</span></div>
+        <div class="nav-item"><span class="nav-icon">👥</span><span class="nav-label">חיילים</span></div>
+      </div>
+    </div>
+    <div class="phone-label">מפקד — מובייל</div>
+  </div>
+
+  <!-- ══════════════════════════════
+       PHONE 6 — COMMANDER STATUS (מצב כוח אדם)
+  ══════════════════════════════ -->
+  <div class="phone">
+    <div class="phone-frame">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <span class="status-icons">📶 🔋</span>
+      </div>
+
+      <div class="screen">
+        <!-- Header -->
+        <div style="padding:14px 16px 8px;display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:11px;color:#4a5270;font-weight:600">07.03.2026 · שבת</div>
+            <div style="font-size:20px;font-weight:800;color:#fff">מצב כוח אדם</div>
+          </div>
+          <button style="background:#1e2333;border:1px solid #2a3045;border-radius:10px;color:#e0e0e0;font-family:inherit;font-size:11px;font-weight:700;padding:7px 12px;cursor:pointer;display:flex;align-items:center;gap:5px">📤 שתף דוח</button>
+        </div>
+
+        <!-- Date strip -->
+        <div class="sched-date-strip">
+          <div class="sched-dp"><div class="sched-dp-day">חמ</div><div class="sched-dp-num">05</div></div>
+          <div class="sched-dp"><div class="sched-dp-day">שי</div><div class="sched-dp-num">06</div></div>
+          <div class="sched-dp active"><div class="sched-dp-day">שב</div><div class="sched-dp-num">07</div></div>
+          <div class="sched-dp"><div class="sched-dp-day">א׳</div><div class="sched-dp-num">08</div></div>
+          <div class="sched-dp"><div class="sched-dp-day">ב׳</div><div class="sched-dp-num">09</div></div>
+          <div class="sched-dp"><div class="sched-dp-day">ג׳</div><div class="sched-dp-num">10</div></div>
+          <div class="sched-dp"><div class="sched-dp-day">ד׳</div><div class="sched-dp-num">11</div></div>
+        </div>
+
+        <!-- ── TOTAL SUMMARY HERO ── -->
+        <div style="margin:12px 14px 10px;background:linear-gradient(135deg,#1a2540,#0f1525);border:1px solid #2a3d70;border-radius:18px;padding:14px">
+          <div style="font-size:10px;font-weight:700;color:#60a5fa;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px">סה"כ פלוגה — 22 חיילים</div>
+          <!-- Big bar -->
+          <div style="display:flex;height:32px;border-radius:10px;overflow:hidden;gap:2px;margin-bottom:10px">
+            <div style="flex:16;background:#1c3a2a;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#4ade80">16</div>
+            <div style="flex:2;background:#3b0d0d;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#f87171">2</div>
+            <div style="flex:3;background:#1a2a40;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#60a5fa">3</div>
+            <div style="flex:1;background:#2a2010;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fbbf24">1</div>
+          </div>
+          <!-- Legend row -->
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:5px">
+              <div style="width:10px;height:10px;border-radius:3px;background:#1c3a2a;border:1px solid #166534"></div>
+              <span style="font-size:11px;color:#4ade80;font-weight:700">16 קיימים</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:5px">
+              <div style="width:10px;height:10px;border-radius:3px;background:#3b0d0d;border:1px solid #7f1d1d"></div>
+              <span style="font-size:11px;color:#f87171;font-weight:700">2 מחלה</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:5px">
+              <div style="width:10px;height:10px;border-radius:3px;background:#1a2a40;border:1px solid #1e3a5f"></div>
+              <span style="font-size:11px;color:#60a5fa;font-weight:700">3 חופשה</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:5px">
+              <div style="width:10px;height:10px;border-radius:3px;background:#2a2010;border:1px solid #78350f"></div>
+              <span style="font-size:11px;color:#fbbf24;font-weight:700">1 יציאה</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── PER-MAHLAKA CARDS ── -->
+        <div style="padding:0 14px 6px;font-size:10px;font-weight:700;color:#4a5270;letter-spacing:0.07em;text-transform:uppercase">לפי מחלקה</div>
+
+        <!-- מחלקה א -->
+        <div style="margin:0 14px 8px;background:#151820;border:1px solid #1e2333;border-radius:14px;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #1e2333;background:#1a1d27">
+            <span style="font-size:13px;font-weight:800;color:#fff">מחלקה א</span>
+            <span style="font-size:12px;font-weight:700;color:#4ade80">7 / 8 קיימים</span>
+          </div>
+          <!-- mini bar -->
+          <div style="display:flex;height:6px;gap:1px;margin:8px 12px 6px">
+            <div style="flex:7;background:#22c55e;border-radius:3px"></div>
+            <div style="flex:1;background:#3b82f6;border-radius:3px"></div>
+          </div>
+          <!-- capabilities row -->
+          <div style="display:flex;gap:5px;flex-wrap:wrap;padding:4px 12px 10px">
+            <div style="background:#1c3a2a;border-radius:5px;padding:3px 7px;font-size:10px;font-weight:700;color:#4ade80">מ"מ ×3</div>
+            <div style="background:#1e2333;border-radius:5px;padding:3px 7px;font-size:10px;font-weight:700;color:#7a8ab0">סמ"ל ×3</div>
+            <div style="background:#1c3a2a;border-radius:5px;padding:3px 7px;font-size:10px;font-weight:700;color:#4ade80">מ"כ ×2</div>
+            <div style="background:#1c3a2a;border-radius:5px;padding:3px 7px;font-size:10px;font-weight:700;color:#4ade80">חובש ×1</div>
+            <div style="background:#2a2010;border-radius:5px;padding:3px 7px;font-size:10px;font-weight:700;color:#fbbf24">מטול ×1</div>
+            <div style="background:#1c3a2a;border-radius:5px;padding:3px 7px;font-size:10px;font-weight:700;color:#4ade80">MAG ×1</div>
+          </div>
+        </div>
+
+        <!-- מחלקה ב -->
+        <div style="margin:0 14px 8px;background:#151820;border:1px solid #1e2333;border-radius:14px;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #1e2333;background:#1a1d27">
+            <span style="font-size:13px;font-weight:800;color:#fff">מחלקה ב</span>
+            <span style="font-size:12px;font-weight:700;color:#f87171">5 / 8 קיימים</span>
+          </div>
+          <div style="display:flex;height:6px;gap:1px;margin:8px 12px 6px">
+            <div style="flex:5;background:#22c55e;border-radius:3px"></div>
+            <div style="flex:2;background:#ef4444;border-radius:3px"></div>
+            <div style="flex:1;background:#3b82f6;border-radius:3px"></div>
+          </div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;padding:4px 12px 10px">
+            <div style="background:#2a2010;border-radius:5px;padding:3px 7px;font-size:10px;font-weight:700;color:#fbbf24">מ"מ ×1 ⚠</div>
+            <div style="background:#1e2333;border-radius:5px;padding:3px 7px;font-size:10px;font-weight:700;color:#7a8ab0">סמ"ל ×2</div>
+            <div style="background:#1c3a2a;border-radius:5px;padding:3px 7px;font-size:10px;font-weight:700;color:#4ade80">מ"כ ×2</div>
+            <div style="background:#3b0d0d;border-radius:5px;padding:3px 7px;font-size:10px;font-weight:700;color:#f87171">חובש ×0 ⛔</div>
+            <div style="background:#1c3a2a;border-radius:5px;padding:3px 7px;font-size:10px;font-weight:700;color:#4ade80">מטול ×3</div>
+            <div style="background:#1c3a2a;border-radius:5px;padding:3px 7px;font-size:10px;font-weight:700;color:#4ade80">MAG ×1</div>
+          </div>
+        </div>
+
+        <!-- מחלקה ג -->
+        <div style="margin:0 14px 8px;background:#151820;border:1px solid #1e2333;border-radius:14px;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #1e2333;background:#1a1d27">
+            <span style="font-size:13px;font-weight:800;color:#fff">מחלקה ג</span>
+            <span style="font-size:12px;font-weight:700;color:#4ade80">7 / 7 קיימים</span>
+          </div>
+          <div style="display:flex;height:6px;gap:1px;margin:8px 12px 6px">
+            <div style="flex:7;background:#22c55e;border-radius:3px"></div>
+          </div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;padding:4px 12px 10px">
+            <div style="background:#1c3a2a;border-radius:5px;padding:3px 7px;font-size:10px;font-weight:700;color:#4ade80">מ"מ ×2</div>
+            <div style="background:#1c3a2a;border-radius:5px;padding:3px 7px;font-size:10px;font-weight:700;color:#4ade80">סמ"ל ×2</div>
+            <div style="background:#1c3a2a;border-radius:5px;padding:3px 7px;font-size:10px;font-weight:700;color:#4ade80">מ"כ ×3</div>
+            <div style="background:#1c3a2a;border-radius:5px;padding:3px 7px;font-size:10px;font-weight:700;color:#4ade80">חובש ×1</div>
+            <div style="background:#1c3a2a;border-radius:5px;padding:3px 7px;font-size:10px;font-weight:700;color:#4ade80">מטול ×2</div>
+            <div style="background:#3b0d0d;border-radius:5px;padding:3px 7px;font-size:10px;font-weight:700;color:#f87171">MAG ×0</div>
+          </div>
+        </div>
+
+        <!-- ── COMPANY ROLES ── -->
+        <div style="padding:6px 14px 6px;font-size:10px;font-weight:700;color:#4a5270;letter-spacing:0.07em;text-transform:uppercase">תפקידי פלוגה</div>
+        <div style="margin:0 14px 10px;background:#151820;border:1px solid #1e2333;border-radius:14px;overflow:hidden">
+          <!-- role rows -->
+          <div style="display:flex;align-items:center;padding:8px 12px;border-bottom:1px solid #1e2333;gap:8px">
+            <span style="font-size:12px;font-weight:700;color:#e0e0e0;flex:1">מ"פ</span>
+            <span style="font-size:10px;font-weight:700;background:#1c3a2a;color:#4ade80;border-radius:4px;padding:2px 7px">מכוסה</span>
+          </div>
+          <div style="display:flex;align-items:center;padding:8px 12px;border-bottom:1px solid #1e2333;gap:8px">
+            <span style="font-size:12px;font-weight:700;color:#e0e0e0;flex:1">סמ"פ</span>
+            <span style="font-size:10px;font-weight:700;background:#1c3a2a;color:#4ade80;border-radius:4px;padding:2px 7px">מכוסה</span>
+          </div>
+          <div style="display:flex;align-items:center;padding:8px 12px;border-bottom:1px solid #1e2333;gap:8px">
+            <span style="font-size:12px;font-weight:700;color:#e0e0e0;flex:1">רס"פ</span>
+            <span style="font-size:10px;font-weight:700;background:#2a2010;color:#fbbf24;border-radius:4px;padding:2px 7px">⚠ חלקית</span>
+          </div>
+          <div style="display:flex;align-items:center;padding:8px 12px;border-bottom:1px solid #1e2333;gap:8px">
+            <span style="font-size:12px;font-weight:700;color:#e0e0e0;flex:1">שליש</span>
+            <span style="font-size:10px;font-weight:700;background:#1c3a2a;color:#4ade80;border-radius:4px;padding:2px 7px">מכוסה</span>
+          </div>
+          <div style="display:flex;align-items:center;padding:8px 12px;gap:8px">
+            <span style="font-size:12px;font-weight:700;color:#e0e0e0;flex:1">חפ"ק מ"פ</span>
+            <span style="font-size:10px;font-weight:700;background:#3b0d0d;color:#f87171;border-radius:4px;padding:2px 7px">⛔ לא מכוסה</span>
+          </div>
+        </div>
+
+        <!-- Share report button -->
+        <div style="padding:0 14px 20px">
+          <button style="width:100%;background:#1e2d4a;border:1px solid #3b82f6;border-radius:14px;color:#60a5fa;font-family:inherit;font-size:13px;font-weight:800;padding:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+            <span>📤</span> שלח דוח מצב למג"ד
+          </button>
+        </div>
+      </div>
+
+      <div class="bottom-nav">
+        <div class="nav-item"><span class="nav-icon">🏠</span><span class="nav-label">בית</span></div>
+        <div class="nav-item active"><span class="nav-icon">📊</span><span class="nav-label" style="color:#3b82f6">מצב כ"א</span></div>
+        <div class="nav-item"><span class="nav-icon nav-badge">🔔</span><span class="nav-label">התראות</span></div>
+        <div class="nav-item"><span class="nav-icon">👥</span><span class="nav-label">חיילים</span></div>
+      </div>
+    </div>
+    <div class="phone-label">מפקד — מצב כוח אדם</div>
+  </div>
+
+  <!-- ══════════════════════════════
+       PHONE 7 — COMMANDER: SOLDIER STATUS GRID
+  ══════════════════════════════ -->
+  <div class="phone">
+    <div class="phone-frame" style="position:relative">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <span class="status-icons">📶 🔋</span>
+      </div>
+
+      <div style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+
+        <!-- ── Header ── -->
+        <div style="padding:10px 14px 6px;display:flex;align-items:center;justify-content:space-between;background:#0f1117;flex-shrink:0">
+          <div style="font-size:17px;font-weight:800;color:#fff">מצב חיילים</div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button id="sort-btn-7" onclick="toggleSort7()" style="background:#1e2333;border:1px solid #2a3045;border-radius:8px;color:#b0b8c8;font-size:10px;font-weight:700;padding:5px 8px;cursor:pointer;font-family:inherit">📋 מחלקה</button>
+            <button onclick="document.getElementById('search-7').focus()" style="background:#1e2333;border:none;border-radius:8px;color:#b0b8c8;font-size:14px;padding:5px 9px;cursor:pointer">🔍</button>
+          </div>
+        </div>
+
+        <!-- ── Search bar ── -->
+        <div style="padding:0 14px 6px;background:#0f1117;flex-shrink:0">
+          <div style="display:flex;align-items:center;gap:7px;background:#1e2333;border:1px solid #2a3045;border-radius:9px;padding:7px 10px">
+            <span style="font-size:13px;color:#4a5270">🔍</span>
+            <input id="search-7" type="text" placeholder="חיפוש חייל..." oninput="renderGrid7()" style="background:transparent;border:none;outline:none;color:#e0e0e0;font-family:inherit;font-size:12px;flex:1">
+            <span id="count-7" style="font-size:10px;color:#4a5270;background:#2a3045;border-radius:4px;padding:2px 6px;font-weight:700">12</span>
+          </div>
+        </div>
+
+        <!-- ── Role filter chips ── -->
+        <div id="rf7" style="display:flex;gap:5px;padding:0 14px 8px;overflow-x:auto;flex-shrink:0">
+          <button class="rf7-chip rf7-active" onclick="selectRole7(this,'all')">הכל</button>
+          <button class="rf7-chip" data-role="מ&quot;מ" onclick="selectRole7(this,this.dataset.role)">מ"מ</button>
+          <button class="rf7-chip" data-role="סמ&quot;ל" onclick="selectRole7(this,this.dataset.role)">סמ"ל</button>
+          <button class="rf7-chip" data-role="מ&quot;כ" onclick="selectRole7(this,this.dataset.role)">מ"כ</button>
+          <button class="rf7-chip" data-role="חובש" onclick="selectRole7(this,this.dataset.role)">חובש</button>
+          <button class="rf7-chip" data-role="נהג" onclick="selectRole7(this,this.dataset.role)">נהג/ת</button>
+          <button class="rf7-chip" data-role="לוחם" onclick="selectRole7(this,this.dataset.role)">לוחם/ת</button>
+        </div>
+
+        <!-- ── 2D scrollable grid ── -->
+        <div style="flex:1;overflow:hidden;position:relative">
+          <div style="overflow:auto;height:100%;width:100%" id="grid-scroll">
+            <table style="border-collapse:collapse;min-width:100%">
+
+              <!-- Sticky date header row -->
+              <thead>
+                <tr style="position:sticky;top:0;z-index:20">
+                  <!-- sticky corner -->
+                  <th style="position:sticky;right:0;z-index:30;background:#151820;border-bottom:2px solid #1e2333;border-left:2px solid #1e2333;min-width:110px;width:110px;padding:7px 8px;text-align:right">
+                    <span style="font-size:9px;font-weight:700;color:#4a5270;letter-spacing:0.06em;text-transform:uppercase">חייל / יום</span>
+                  </th>
+                  <!-- day columns -->
+                  <th style="background:#151820;border-bottom:2px solid #1e2333;min-width:72px;width:72px;padding:6px 4px;text-align:center">
+                    <div style="font-size:9px;color:#4a5270;font-weight:600">חמישי</div>
+                    <div style="font-size:17px;font-weight:800;color:#e0e0e0;line-height:1">05</div>
+                    <div style="font-size:9px;color:#4a5270">מרץ</div>
+                  </th>
+                  <th style="background:#151820;border-bottom:2px solid #1e2333;min-width:72px;width:72px;padding:6px 4px;text-align:center">
+                    <div style="font-size:9px;color:#4a5270;font-weight:600">שישי</div>
+                    <div style="font-size:17px;font-weight:800;color:#e0e0e0;line-height:1">06</div>
+                    <div style="font-size:9px;color:#4a5270">מרץ</div>
+                  </th>
+                  <th style="background:#1a1d2e;border-bottom:2px solid #3b82f6;min-width:72px;width:72px;padding:6px 4px;text-align:center">
+                    <div style="font-size:9px;color:#60a5fa;font-weight:700">שבת · היום</div>
+                    <div style="font-size:17px;font-weight:800;color:#3b82f6;line-height:1;text-decoration:underline">07</div>
+                    <div style="font-size:9px;color:#60a5fa">מרץ</div>
+                  </th>
+                  <th style="background:#151820;border-bottom:2px solid #1e2333;min-width:72px;width:72px;padding:6px 4px;text-align:center">
+                    <div style="font-size:9px;color:#4a5270;font-weight:600">ראשון</div>
+                    <div style="font-size:17px;font-weight:800;color:#e0e0e0;line-height:1">08</div>
+                    <div style="font-size:9px;color:#4a5270">מרץ</div>
+                  </th>
+                  <th style="background:#151820;border-bottom:2px solid #1e2333;min-width:72px;width:72px;padding:6px 4px;text-align:center">
+                    <div style="font-size:9px;color:#4a5270;font-weight:600">שני</div>
+                    <div style="font-size:17px;font-weight:800;color:#e0e0e0;line-height:1">09</div>
+                    <div style="font-size:9px;color:#4a5270">מרץ</div>
+                  </th>
+                  <th style="background:#151820;border-bottom:2px solid #1e2333;min-width:72px;width:72px;padding:6px 4px;text-align:center">
+                    <div style="font-size:9px;color:#4a5270;font-weight:600">שלישי</div>
+                    <div style="font-size:17px;font-weight:800;color:#e0e0e0;line-height:1">10</div>
+                    <div style="font-size:9px;color:#4a5270">מרץ</div>
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody id="grid7-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Legend strip -->
+        <div style="display:flex;gap:8px;padding:5px 12px;background:#151820;border-top:1px solid #1e2333;flex-wrap:wrap;flex-shrink:0;align-items:center">
+          <span style="font-size:9px;color:#4ade80">■ קיים</span>
+          <span style="font-size:9px;color:#f87171">■ מחלה</span>
+          <span style="font-size:9px;color:#60a5fa">■ חופ'</span>
+          <span style="font-size:9px;color:#fbbf24">■ יצ'</span>
+          <span style="font-size:9px;color:#c4b5fd">■ חז'</span>
+          <span style="font-size:9px;color:#4a5270;margin-right:auto">הקש תא לעריכה</span>
+        </div>
+      </div>
+
+      <!-- ── Edit bottom sheet (shown when cell tapped) ── -->
+      <div id="edit-sheet-7" style="position:absolute;bottom:0;left:0;right:0;background:#1a1d27;border-top:2px solid #2a3045;border-radius:20px 20px 0 0;padding:16px;z-index:50;transform:translateY(100%);transition:transform 0.25s ease">
+        <div style="width:36px;height:4px;background:#2a3045;border-radius:2px;margin:0 auto 14px"></div>
+        <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:2px" id="edit-name-7">אבי בן דוד</div>
+        <div style="font-size:11px;color:#4a5270;margin-bottom:14px" id="edit-date-7">07.03.2026 · קיים</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+          <button onclick="setStatus7('קיים')" style="background:#1c3a2a;border:2px solid #166534;border-radius:10px;color:#4ade80;font-family:inherit;font-size:13px;font-weight:700;padding:10px;cursor:pointer">✓ קיים</button>
+          <button onclick="setStatus7('מחלה')" style="background:#3b0d0d;border:1px solid #7f1d1d;border-radius:10px;color:#f87171;font-family:inherit;font-size:13px;font-weight:700;padding:10px;cursor:pointer">🤒 מחלה</button>
+          <button onclick="setStatus7('חופשה')" style="background:#1a2a40;border:1px solid #1e3a5f;border-radius:10px;color:#60a5fa;font-family:inherit;font-size:13px;font-weight:700;padding:10px;cursor:pointer">🏖 חופשה</button>
+          <button onclick="setStatus7('יציאה')" style="background:#2a2010;border:1px solid #78350f;border-radius:10px;color:#fbbf24;font-family:inherit;font-size:13px;font-weight:700;padding:10px;cursor:pointer">🚗 יציאה</button>
+          <button onclick="setStatus7('חזרה')" style="background:#2d1f54;border:1px solid #7e22ce;border-radius:10px;color:#c4b5fd;font-family:inherit;font-size:13px;font-weight:700;padding:10px;cursor:pointer;grid-column:span 2">↩ חזרה</button>
+        </div>
+        <div id="time-row-7" style="display:none;align-items:center;gap:8px;margin-bottom:12px;background:#0f1117;border:1px solid #2a3045;border-radius:10px;padding:10px 12px">
+          <span style="font-size:12px;color:#7a8ab0">שעה:</span>
+          <select style="background:transparent;border:none;outline:none;color:#e0e0e0;font-family:inherit;font-size:15px;font-weight:700;flex:1">
+            <option>08:00</option><option>10:00</option><option>12:00</option><option>14:00</option>
+            <option>16:00</option><option>18:00</option><option>20:00</option><option>22:00</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button onclick="closeEdit7()" style="flex:1;background:#1e2333;border:1px solid #2a3045;border-radius:10px;color:#7a8ab0;font-family:inherit;font-size:13px;font-weight:700;padding:10px;cursor:pointer">ביטול</button>
+          <button onclick="closeEdit7()" style="flex:2;background:#3b82f6;border:none;border-radius:10px;color:#fff;font-family:inherit;font-size:13px;font-weight:700;padding:10px;cursor:pointer">שמור</button>
+        </div>
+      </div>
+
+      <div class="bottom-nav">
+        <div class="nav-item"><span class="nav-icon">🏠</span><span class="nav-label">בית</span></div>
+        <div class="nav-item active"><span class="nav-icon">📊</span><span class="nav-label" style="color:#3b82f6">מצב כ"א</span></div>
+        <div class="nav-item"><span class="nav-icon nav-badge">🔔</span><span class="nav-label">התראות</span></div>
+        <div class="nav-item"><span class="nav-icon">👥</span><span class="nav-label">חיילים</span></div>
+      </div>
+    </div>
+    <div class="phone-label">מפקד — עריכת מצב חיילים</div>
+  </div>
+
+</div>
+
+<script>
+// ── Frame 7: Soldier Status Grid ──────────────────────────────
+const S7 = [
+  // מפלג (uO=0) — sorted by rO within unit
+  { n:'מ"פ כהן',     i:'מפ', u:'מפלג',    uO:0, r:'מ"פ',  rO:0, av:['#1d3557','#7eb8f7'], d:{5:'קיים',6:'קיים',7:'קיים',8:'קיים',9:'קיים',10:'קיים'} },
+  { n:'סמ"פ דוד',    i:'סד', u:'מפלג',    uO:0, r:'סמ"פ', rO:1, av:['#2d1f54','#c4b5fd'], d:{5:'קיים',6:'קיים',7:'קיים',8:'חופשה',9:'חופשה',10:'קיים'} },
+  { n:'רס"פ ברזל',   i:'רז', u:'מפלג',    uO:0, r:'רס"פ', rO:2, av:['#0d2a2a','#5eead4'], d:{5:'קיים',6:'קיים',7:'קיים',8:'קיים',9:'קיים',10:'קיים'} },
+  { n:'שליש גבע',    i:'שג', u:'מפלג',    uO:0, r:'שליש', rO:3, av:['#2a2010','#fbbf24'], d:{5:'קיים',6:'יציאה 14:00',7:'חזרה 10:00',8:'קיים',9:'קיים',10:'קיים'} },
+  // מחלקה א (uO=1)
+  { n:'סמ"ר לוי',    i:'סל', u:'מחלקה א', uO:1, r:'מ"מ',  rO:4, av:['#2d1f54','#c4b5fd'], d:{5:'קיים',6:'קיים',7:'קיים',8:'קיים',9:'קיים',10:'יציאה 12:00'} },
+  { n:'אבי בן דוד',  i:'אב', u:'מחלקה א', uO:1, r:'לוחם', rO:9, av:['#1c3a2a','#4ade80'], d:{5:'קיים',6:'קיים',7:'קיים',8:'חופשה',9:'חזרה 12:00',10:'קיים'} },
+  { n:'גל מזרחי',    i:'גמ', u:'מחלקה א', uO:1, r:'לוחם', rO:9, av:['#2d1f54','#c4b5fd'], d:{5:'יציאה 12:00',6:'חופשה',7:'חזרה 16:00',8:'קיים',9:'קיים',10:'קיים'} },
+  // מחלקה ב (uO=2)
+  { n:'דני לוי',     i:'דל', u:'מחלקה ב', uO:2, r:'מ"כ',  rO:6, av:['#1d3557','#7eb8f7'], d:{5:'קיים',6:'קיים',7:'קיים',8:'מחלה',9:'מחלה',10:'קיים'} },
+  { n:'רון נחמני',   i:'רנ', u:'מחלקה ב', uO:2, r:'נהג',  rO:8, av:['#2a2010','#fbbf24'], d:{5:'קיים',6:'יציאה 12:00',7:'חזרה 12:00',8:'קיים',9:'קיים',10:'קיים'} },
+  // מחלקה ג (uO=3)
+  { n:'משה כהן',     i:'מח', u:'מחלקה ג', uO:3, r:'לוחם', rO:9, av:['#2a2010','#fbbf24'], d:{5:'קיים',6:'קיים',7:'קיים',8:'קיים',9:'חופשה',10:'חופשה'} },
+  { n:'יוסי לוי',    i:'יל', u:'מחלקה ג', uO:3, r:'לוחם', rO:9, av:['#0d2a2a','#5eead4'], d:{5:'קיים',6:'קיים',7:'מחלה',8:'מחלה',9:'קיים',10:'קיים'} },
+  { n:'רחל ברק',     i:'רב', u:'מחלקה ג', uO:3, r:'נהגת', rO:8, av:['#0d2a2a','#5eead4'], d:{5:'קיים',6:'קיים',7:'קיים',8:'קיים',9:'קיים',10:'קיים'} },
+];
+
+const DAYS7  = [5,6,7,8,9,10];
+const TODAY7 = 7;
+
+const STAT7 = {
+  'קיים':  {bg:'#1c3a2a',fg:'#4ade80',lbl:'קיים'},
+  'מחלה':  {bg:'#3b0d0d',fg:'#f87171',lbl:'מחלה'},
+  'חופשה': {bg:'#1a2a40',fg:'#60a5fa',lbl:"חופ'"},
+  'יציאה': {bg:'#2a2010',fg:'#fbbf24',lbl:"יצ'"},
+  'חזרה':  {bg:'#2d1f54',fg:'#c4b5fd',lbl:"חז'"},
+};
+const TODAY_BORDER = {
+  'קיים':'1px solid #166534','מחלה':'1px solid #7f1d1d',
+  'חזרה':'1px solid #7e22ce','יציאה':'','חופשה':'',
+};
+
+function parseS7(v) {
+  for (const k of ['יציאה','חזרה','מחלה','חופשה','קיים'])
+    if (v.startsWith(k)) return {type:k, time:v.slice(k.length).trim()||null};
+  return {type:'קיים',time:null};
+}
+
+function cellHtml7(raw, isToday, soldierName, dayStr) {
+  const {type,time} = parseS7(raw);
+  const st = STAT7[type];
+  const border = isToday ? (TODAY_BORDER[type]||'') : '';
+  const borderCSS = border ? `border:${border};` : '';
+  const tdBg = isToday ? '#111520' : '#0f1117';
+  const inner = time
+    ? `<div style="background:${st.bg};${borderCSS}border-radius:6px;padding:3px 2px;font-size:9px;font-weight:700;color:${st.fg};line-height:1.3">${st.lbl}<br>${time}</div>`
+    : `<div style="background:${st.bg};${borderCSS}border-radius:6px;padding:4px 3px;font-size:10px;font-weight:700;color:${st.fg}">${st.lbl}</div>`;
+  const esc = (s) => s.replace(/'/g,"&apos;");
+  return `<td style="padding:5px 4px;text-align:center;background:${tdBg};cursor:pointer" onclick="openEdit7('${esc(soldierName)}','${dayStr}.03','${esc(raw)}')">${inner}</td>`;
+}
+
+function dividerRow7(label, color) {
+  color = color || '#e0e0e0';
+  return `<tr><td style="position:sticky;right:0;z-index:15;background:#1a1d27;border-left:2px solid #2a3045;padding:5px 8px;border-top:1px solid #2a3045;border-bottom:1px solid #2a3045"><span style="font-size:10px;font-weight:800;color:${color};letter-spacing:0.04em">${label}</span></td><td colspan="6" style="background:#1a1d27;border-top:1px solid #2a3045;border-bottom:1px solid #2a3045"></td></tr>`;
+}
+
+function soldierRow7(s, subtitle) {
+  const cells = DAYS7.map((d,i) => {
+    const dayStr = String(d).padStart(2,'0');
+    return cellHtml7(s.d[d]||'קיים', d===TODAY7, s.n, dayStr);
+  }).join('');
+  return `<tr style="border-bottom:1px solid #1a1d27"><td style="position:sticky;right:0;z-index:10;background:#151820;border-left:2px solid #1e2333;padding:7px 8px;min-width:110px"><div style="display:flex;align-items:center;gap:6px"><div style="width:24px;height:24px;border-radius:50%;background:${s.av[0]};color:${s.av[1]};font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${s.i}</div><div><div style="font-size:11px;font-weight:700;color:#e0e0e0;white-space:nowrap">${s.n}</div><div style="font-size:9px;color:#4a5270">${subtitle}</div></div></div></td>${cells}</tr>`;
+}
+
+let sortMode7  = 'unit';
+let filterRole7 = 'all';
+
+// Unit label colors
+const UNIT_COLOR = {'מפלג':'#60a5fa','מחלקה א':'#e0e0e0','מחלקה ב':'#e0e0e0','מחלקה ג':'#e0e0e0'};
+
+function renderGrid7() {
+  const search = (document.getElementById('search-7')?.value||'').toLowerCase();
+  const ROLE_NORM = {'נהג':['נהג','נהגת'],'לוחם':['לוחם','לוחמת']};
+
+  const filtered = S7.filter(s => {
+    let roleMatch;
+    if (filterRole7 === 'all') {
+      roleMatch = true;
+    } else {
+      const alts = ROLE_NORM[filterRole7] || [filterRole7];
+      roleMatch = alts.includes(s.r);
+    }
+    const searchMatch = !search || s.n.includes(search) || s.r.includes(search) || s.u.includes(search);
+    return roleMatch && searchMatch;
+  });
+
+  document.getElementById('count-7').textContent = filtered.length;
+
+  let html = '';
+  if (sortMode7 === 'unit') {
+    // Group by unit (uO order), within each sort by rO
+    const units = [...new Set(S7.map(s=>s.u))].sort((a,b) => S7.find(s=>s.u===a).uO - S7.find(s=>s.u===b).uO);
+    for (const unit of units) {
+      const group = filtered.filter(s=>s.u===unit).sort((a,b)=>a.rO-b.rO);
+      if (!group.length) continue;
+      html += dividerRow7(unit, UNIT_COLOR[unit]||'#e0e0e0');
+      for (const s of group) html += soldierRow7(s, s.r);
+    }
+  } else {
+    // Group by role (rO order), within each sort by uO
+    const roleOrder = [...new Map(S7.map(s=>[s.r,s.rO])).entries()].sort((a,b)=>a[1]-b[1]).map(e=>e[0]);
+    const roles = roleOrder.filter(r => filtered.some(s=>s.r===r));
+    for (const role of roles) {
+      const group = filtered.filter(s=>s.r===role).sort((a,b)=>a.uO-b.uO);
+      html += dividerRow7(role);
+      for (const s of group) html += soldierRow7(s, s.u);
+    }
+  }
+
+  document.getElementById('grid7-body').innerHTML = html;
+}
+
+function selectRole7(btn, role) {
+  document.querySelectorAll('#rf7 .rf7-chip').forEach(b=>b.classList.remove('rf7-active'));
+  btn.classList.add('rf7-active');
+  filterRole7 = role;
+  renderGrid7();
+}
+
+function toggleSort7() {
+  sortMode7 = sortMode7 === 'unit' ? 'role' : 'unit';
+  document.getElementById('sort-btn-7').textContent = sortMode7 === 'unit' ? '📋 מחלקה' : '🎖 תפקיד';
+  renderGrid7();
+}
+
+function openEdit7(soldier, date, currentStatus) {
+  document.getElementById('edit-name-7').textContent = soldier;
+  document.getElementById('edit-date-7').textContent = date + '.2026 · ' + currentStatus;
+  document.getElementById('edit-sheet-7').style.transform = 'translateY(0)';
+  const {type} = parseS7(currentStatus);
+  document.getElementById('time-row-7').style.display = (type==='יציאה'||type==='חזרה') ? 'flex' : 'none';
+}
+
+function setStatus7(status) {
+  document.getElementById('time-row-7').style.display = (status==='יציאה'||status==='חזרה') ? 'flex' : 'none';
+}
+
+function closeEdit7() {
+  document.getElementById('edit-sheet-7').style.transform = 'translateY(100%)';
+}
+
+// Initial render
+renderGrid7();
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__figma-remote-mcp__generate_figma_design",
+      "Bash(npx:*)",
+      "Bash(start:*)",
+      "Bash(python:*)",
+      "Bash(netstat:*)",
+      "Bash(explorer:*)",
+      "Bash(powershell:*)",
+      "Bash(curl:*)",
+      "Bash(taskkill:*)"
+    ]
+  }
+}

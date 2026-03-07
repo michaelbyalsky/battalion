@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440" />
+  <title>ניהול חיילים — Wireframe</title>
+  <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Heebo', sans-serif; background: #f0f2f5; color: #1a1a1a; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* Topbar */
+    .topbar { height: 56px; background: #1a1a2e; display: flex; align-items: center; padding: 0 28px; gap: 18px; flex-shrink: 0; }
+    .topbar-logo { font-size: 15px; font-weight: 700; color: #fff; }
+    .topbar-sep  { width: 1px; height: 24px; background: #333; }
+    .topbar-title { font-size: 14px; font-weight: 500; color: #ccc; flex: 1; }
+    .search-wrap { position: relative; }
+    .search-icon { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #888; font-size: 13px; }
+    .search-box { border: 1px solid #333; border-radius: 8px; padding: 7px 32px 7px 14px; font-family: inherit; font-size: 13px; width: 240px; color: #fff; background: #252540; }
+    .search-box::placeholder { color: #666; }
+    .topbar-btn { background: #4f6ef7; color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+
+    .layout { flex: 1; display: flex; overflow: hidden; }
+
+    /* ── List panel ── */
+    .list-panel { width: 300px; background: #fff; border-left: 1px solid #e0e0e0; display: flex; flex-direction: column; flex-shrink: 0; }
+    .list-header { padding: 16px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
+    .list-heading { font-size: 14px; font-weight: 700; }
+    .list-count { font-size: 12px; color: #999; background: #f5f5f5; border-radius: 20px; padding: 2px 10px; }
+    .filter-row { padding: 10px 14px; border-bottom: 1px solid #f0f0f0; display: flex; gap: 6px; }
+    .filter-chip { border: 1px solid #e0e0e0; border-radius: 20px; padding: 4px 12px; font-size: 11px; font-weight: 600; cursor: pointer; color: #777; background: #fff; }
+    .filter-chip.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+
+    .soldiers-list { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 3px; }
+
+    .soldier-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; cursor: pointer; }
+    .soldier-row:hover { background: #f8f8f8; }
+    .soldier-row.selected { background: #eef1ff; }
+    .s-avatar { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .s-info { flex: 1; min-width: 0; }
+    .s-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .s-meta { font-size: 11px; color: #999; margin-top: 1px; }
+    .s-status { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+    .s-status.present  { background: #e8f5e9; color: #2e7d32; }
+    .s-status.sick     { background: #fce4ec; color: #880e4f; }
+    .s-status.vacation { background: #e3f2fd; color: #0d47a1; }
+    .s-status.out      { background: #f5f5f5; color: #888; border: 1px solid #e0e0e0; }
+
+    /* ── Profile panel ── */
+    .profile-panel { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 18px; }
+
+    /* Header card */
+    .profile-header {
+      background: #1a1a2e; border-radius: 16px; padding: 28px;
+      display: flex; align-items: flex-start; gap: 20px; position: relative; overflow: hidden;
+    }
+    .profile-header::before {
+      content: ''; position: absolute; top: -40px; left: -40px;
+      width: 180px; height: 180px; border-radius: 50%;
+      background: rgba(79,110,247,0.15);
+    }
+    .p-avatar {
+      width: 72px; height: 72px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; font-weight: 700; color: #fff;
+      border: 3px solid rgba(255,255,255,0.2); flex-shrink: 0;
+      position: relative; z-index: 1;
+    }
+    .p-details { flex: 1; position: relative; z-index: 1; }
+    .p-name   { font-size: 22px; font-weight: 700; color: #fff; }
+    .p-role   { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 3px; }
+    .p-phone  { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 4px; direction: ltr; text-align: right; }
+    .p-caps   { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+    .p-cap-badge {
+      font-size: 11px; font-weight: 700; padding: 3px 10px;
+      border-radius: 20px; border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.1);
+    }
+    .p-actions { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; position: relative; z-index: 1; }
+    .btn-save   { background: #4f6ef7; color: #fff; border: none; border-radius: 8px; padding: 8px 20px; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .btn-edit   { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 7px 16px; font-family: inherit; font-size: 13px; cursor: pointer; }
+    .btn-remove { background: transparent; color: rgba(255,100,100,0.8); border: 1px solid rgba(255,100,100,0.3); border-radius: 8px; padding: 7px 16px; font-family: inherit; font-size: 12px; cursor: pointer; }
+
+    /* Stats row */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .stat-card { background: #fff; border-radius: 12px; padding: 16px 18px; border: 1px solid #e8e8e8; }
+    .stat-label { font-size: 11px; color: #999; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+    .stat-value { font-size: 24px; font-weight: 700; }
+    .stat-sub   { font-size: 11px; color: #bbb; margin-top: 3px; }
+    .stat-bar-wrap { height: 4px; background: #eee; border-radius: 2px; margin-top: 8px; overflow: hidden; }
+    .stat-bar { height: 100%; border-radius: 2px; }
+
+    /* Section card */
+    .section { background: #fff; border-radius: 12px; border: 1px solid #e8e8e8; overflow: hidden; }
+    .section-title {
+      font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: #999;
+      padding: 14px 20px; border-bottom: 1px solid #f0f0f0;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-title-icon { font-size: 14px; }
+    .section-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+
+    .field-grid   { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px; }
+    .field-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px 20px; }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field-label { font-size: 11px; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; }
+    .field-input {
+      border: 1px solid #e8e8e8; border-radius: 8px; padding: 9px 12px;
+      font-family: inherit; font-size: 14px; color: #1a1a1a; background: #fafafa; width: 100%;
+      transition: border-color 0.15s;
+    }
+    .field-input:focus { outline: none; border-color: #4f6ef7; background: #fff; }
+    .field-select {
+      border: 1px solid #e8e8e8; border-radius: 8px; padding: 9px 12px;
+      font-family: inherit; font-size: 14px; background: #fafafa; width: 100%;
+      appearance: none; -webkit-appearance: none; cursor: pointer;
+    }
+    textarea.field-input { resize: vertical; line-height: 1.5; }
+
+    /* Capability grid */
+    .caps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .cap-item {
+      display: flex; align-items: center; gap: 8px;
+      border: 1.5px solid #e8e8e8; border-radius: 8px; padding: 9px 12px;
+      cursor: pointer; font-size: 13px; font-weight: 500; color: #555;
+    }
+    .cap-item.checked { font-weight: 700; }
+    .cap-item.checked.m16   { border-color: #a5d6a7; background: #f1f8f2; color: #2e7d32; }
+    .cap-item.checked.mag   { border-color: #ffcc80; background: #fff8f0; color: #e65100; }
+    .cap-item.checked.lau   { border-color: #f48fb1; background: #fdf0f4; color: #880e4f; }
+    .cap-item.checked.negen { border-color: #90caf9; background: #f0f6fd; color: #0d47a1; }
+    .cap-item.checked.hovesh{ border-color: #ce93d8; background: #f9f0fc; color: #4a148c; }
+    .cap-item.checked.matol { border-color: #ffe082; background: #fffdf0; color: #f57f17; }
+    .checkbox { width: 18px; height: 18px; border: 2px solid #ddd; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+    .cap-item.checked .checkbox { border-color: currentColor; background: currentColor; color: #fff; }
+
+    /* Toggle */
+    .toggle-row { display: flex; gap: 6px; }
+    .toggle-option { flex: 1; border: 1.5px solid #e8e8e8; border-radius: 8px; padding: 9px; text-align: center; cursor: pointer; font-size: 13px; font-weight: 500; color: #777; }
+    .toggle-option.selected { border-color: #1a1a2e; background: #1a1a2e; color: #fff; font-weight: 700; }
+
+    /* Default time selects */
+    .times-row { display: flex; gap: 20px; }
+    .time-field { display: flex; flex-direction: column; gap: 5px; }
+    .time-field label { font-size: 11px; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; }
+    .time-field select {
+      border: 1.5px solid #e8e8e8; border-radius: 8px; padding: 9px 36px 9px 14px;
+      font-family: inherit; font-size: 16px; font-weight: 700; width: 130px;
+      appearance: none; -webkit-appearance: none; background: #fafafa; cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23999' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: left 10px center;
+    }
+    .time-note { font-size: 11px; color: #bbb; }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-logo">מערכת פיקוד</div>
+    <div class="topbar-sep"></div>
+    <div class="topbar-title">ניהול חיילים</div>
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input class="search-box" placeholder="חיפוש לפי שם, מספר..." />
+    </div>
+    <button class="topbar-btn">+ הוסף חייל</button>
+  </div>
+
+  <div class="layout">
+
+    <!-- List -->
+    <aside class="list-panel">
+      <div class="list-header">
+        <span class="list-heading">חיילים</span>
+        <span class="list-count">9</span>
+      </div>
+      <div class="filter-row">
+        <div class="filter-chip active">הכל</div>
+        <div class="filter-chip">קיים</div>
+        <div class="filter-chip">חופשה</div>
+        <div class="filter-chip">מחלה</div>
+      </div>
+      <div class="soldiers-list">
+
+        <div class="soldier-row selected">
+          <div class="s-avatar" style="background:#7c3aed;">דנ</div>
+          <div class="s-info"><div class="s-name">דני לוי</div><div class="s-meta">מ"כ · נגן · מטול</div></div>
+          <div class="s-status sick">מחלה</div>
+        </div>
+        <div class="soldier-row">
+          <div class="s-avatar" style="background:#1565c0;">אב</div>
+          <div class="s-info"><div class="s-name">אבי בן דוד</div><div class="s-meta">לוחם · חובש</div></div>
+          <div class="s-status present">קיים</div>
+        </div>
+        <div class="soldier-row">
+          <div class="s-avatar" style="background:#2e7d32;">גל</div>
+          <div class="s-info"><div class="s-name">גל מזרחי</div><div class="s-meta">לוחם · MAG</div></div>
+          <div class="s-status present">קיים</div>
+        </div>
+        <div class="soldier-row">
+          <div class="s-avatar" style="background:#e65100;">יו</div>
+          <div class="s-info"><div class="s-name">יותם כהן</div><div class="s-meta">לוחם · LAU</div></div>
+          <div class="s-status vacation">חופשה</div>
+        </div>
+        <div class="soldier-row">
+          <div class="s-avatar" style="background:#00796b;">מא</div>
+          <div class="s-info"><div class="s-name">מאור שמש</div><div class="s-meta">לוחם · נגן</div></div>
+          <div class="s-status present">קיים</div>
+        </div>
+        <div class="soldier-row">
+          <div class="s-avatar" style="background:#c62828;">נת</div>
+          <div class="s-info"><div class="s-name">נתנאל פרץ</div><div class="s-meta">לוחם · מטול</div></div>
+          <div class="s-status present">קיים</div>
+        </div>
+        <div class="soldier-row">
+          <div class="s-avatar" style="background:#4527a0;">סל</div>
+          <div class="s-info"><div class="s-name">סמ"ר לוי</div><div class="s-meta">מ"מ · MAG · LAU</div></div>
+          <div class="s-status out">יציאה</div>
+        </div>
+        <div class="soldier-row">
+          <div class="s-avatar" style="background:#558b2f;">עמ</div>
+          <div class="s-info"><div class="s-name">עמית חדד</div><div class="s-meta">לוחם · חובש</div></div>
+          <div class="s-status present">קיים</div>
+        </div>
+        <div class="soldier-row">
+          <div class="s-avatar" style="background:#4e342e;">רן</div>
+          <div class="s-info"><div class="s-name">רן ברוק</div><div class="s-meta">לוחם · M16</div></div>
+          <div class="s-status present">קיים</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Profile -->
+    <div class="profile-panel">
+
+      <!-- Hero header -->
+      <div class="profile-header">
+        <div class="p-avatar" style="background:#7c3aed;">דנ</div>
+        <div class="p-details">
+          <div class="p-name">דני לוי</div>
+          <div class="p-role">מ"כ — גדוד 77</div>
+          <div class="p-phone">050-1234567</div>
+          <div class="p-caps">
+            <span class="p-cap-badge">M16</span>
+            <span class="p-cap-badge">נגן</span>
+            <span class="p-cap-badge">מטול</span>
+            <span class="p-cap-badge">קשר</span>
+          </div>
+        </div>
+        <div class="p-actions">
+          <button class="btn-save">שמור</button>
+          <button class="btn-edit">ערוך</button>
+          <button class="btn-remove">הסר חייל</button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">ימי חופש</div>
+          <div class="stat-value">5 <span style="font-size:14px;color:#bbb;font-weight:400;">/ 14</span></div>
+          <div class="stat-bar-wrap"><div class="stat-bar" style="width:36%;background:#4f6ef7;"></div></div>
+          <div class="stat-sub">9 ימים נותרו</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">מרחק מהבסיס</div>
+          <div class="stat-value">45<span style="font-size:14px;color:#bbb;font-weight:400;"> ק"מ</span></div>
+          <div class="stat-sub">~35 דקות נסיעה</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">רכב</div>
+          <div class="stat-value" style="font-size:18px;margin-top:4px;">הונדה סיוויק</div>
+          <div class="stat-sub">12-345-67</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">פרופיל רפואי</div>
+          <div class="stat-value">97</div>
+          <div class="stat-sub">ללא מגבלות</div>
+        </div>
+      </div>
+
+      <!-- Personal -->
+      <div class="section">
+        <div class="section-title"><span class="section-title-icon">👤</span> פרטים אישיים</div>
+        <div class="section-body">
+          <div class="field-grid">
+            <div class="field"><div class="field-label">שם מלא</div><input class="field-input" value="דני לוי" /></div>
+            <div class="field"><div class="field-label">טלפון</div><input class="field-input" value="050-1234567" /></div>
+            <div class="field"><div class="field-label">דרגה / תפקיד</div><input class="field-input" value='מ"כ' /></div>
+            <div class="field"><div class="field-label">מספר אישי</div><input class="field-input" value="7723441" /></div>
+            <div class="field" style="grid-column:span 2;"><div class="field-label">כתובת מגורים</div><input class="field-input" value="רחוב הרצל 12, תל אביב" /></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Emergency -->
+      <div class="section">
+        <div class="section-title"><span class="section-title-icon">🚨</span> איש קשר לחירום</div>
+        <div class="section-body">
+          <div class="field-grid">
+            <div class="field"><div class="field-label">שם</div><input class="field-input" value="רחל לוי (אמא)" /></div>
+            <div class="field"><div class="field-label">טלפון</div><input class="field-input" value="054-9876543" /></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logistics -->
+      <div class="section">
+        <div class="section-title"><span class="section-title-icon">🚗</span> לוגיסטיקה</div>
+        <div class="section-body">
+          <div class="field-grid-3">
+            <div class="field"><div class="field-label">רכב פרטי</div>
+              <div class="toggle-row"><div class="toggle-option selected">יש</div><div class="toggle-option">אין</div></div>
+            </div>
+            <div class="field"><div class="field-label">סוג רכב</div><input class="field-input" value="הונדה סיוויק 2020" /></div>
+            <div class="field"><div class="field-label">מספר רכב</div><input class="field-input" value="12-345-67" /></div>
+          </div>
+          <div class="field-grid">
+            <div class="field"><div class="field-label">מרחק מהבסיס</div><input class="field-input" value='45 ק"מ' /></div>
+            <div class="field"><div class="field-label">זמן נסיעה משוער</div><input class="field-input" value="35 דקות" /></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Capabilities -->
+      <div class="section">
+        <div class="section-title"><span class="section-title-icon">⚔️</span> כישורים ונשק</div>
+        <div class="section-body">
+          <div class="caps-grid">
+            <div class="cap-item checked m16"><div class="checkbox">✓</div> M16</div>
+            <div class="cap-item checked negen"><div class="checkbox">✓</div> נגן</div>
+            <div class="cap-item checked matol"><div class="checkbox">✓</div> מטול</div>
+            <div class="cap-item"><div class="checkbox"></div> MAG</div>
+            <div class="cap-item"><div class="checkbox"></div> LAU</div>
+            <div class="cap-item"><div class="checkbox"></div> חובש</div>
+            <div class="cap-item checked m16"><div class="checkbox">✓</div> קשר</div>
+            <div class="cap-item"><div class="checkbox"></div> נאט"ק</div>
+            <div class="cap-item"><div class="checkbox"></div> מ"מ בפועל</div>
+            <div class="cap-item"><div class="checkbox"></div> מחבל קרב</div>
+            <div class="cap-item checked m16"><div class="checkbox">✓</div> נהג</div>
+            <div class="cap-item"><div class="checkbox"></div> נהג ג'יפ</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Medical -->
+      <div class="section">
+        <div class="section-title"><span class="section-title-icon">🏥</span> מגבלות רפואיות</div>
+        <div class="section-body">
+          <div class="field-grid">
+            <div class="field"><div class="field-label">פרופיל רפואי</div>
+              <select class="field-select"><option selected>97</option><option>82</option><option>72</option><option>64</option></select>
+            </div>
+            <div class="field"><div class="field-label">אלרגיות / תרופות</div><input class="field-input" placeholder="ללא" /></div>
+          </div>
+          <div class="field"><div class="field-label">הערות</div><input class="field-input" placeholder="הכנס הערות..." /></div>
+        </div>
+      </div>
+
+      <!-- Default times -->
+      <div class="section">
+        <div class="section-title"><span class="section-title-icon">🕐</span> שעות ברירת מחדל</div>
+        <div class="section-body">
+          <div class="times-row">
+            <div class="time-field">
+              <label>שעת יציאה</label>
+              <select><option>00:00</option><option>00:30</option><option>01:00</option><option>01:30</option><option>02:00</option><option>02:30</option><option>03:00</option><option>03:30</option><option>04:00</option><option>04:30</option><option>05:00</option><option>05:30</option><option>06:00</option><option>06:30</option><option>07:00</option><option>07:30</option><option>08:00</option><option>08:30</option><option>09:00</option><option>09:30</option><option>10:00</option><option>10:30</option><option>11:00</option><option>11:30</option><option selected>12:00</option><option>12:30</option><option>13:00</option><option>13:30</option><option>14:00</option><option>14:30</option><option>15:00</option><option>15:30</option><option>16:00</option><option>16:30</option><option>17:00</option><option>17:30</option><option>18:00</option><option>18:30</option><option>19:00</option><option>19:30</option><option>20:00</option><option>20:30</option><option>21:00</option><option>21:30</option><option>22:00</option><option>22:30</option><option>23:00</option><option>23:30</option></select>
+              <div class="time-note">ברירת מחדל לכל יציאה</div>
+            </div>
+            <div class="time-field">
+              <label>שעת חזרה</label>
+              <select><option>00:00</option><option>00:30</option><option>01:00</option><option>01:30</option><option>02:00</option><option>02:30</option><option>03:00</option><option>03:30</option><option>04:00</option><option>04:30</option><option>05:00</option><option>05:30</option><option>06:00</option><option>06:30</option><option>07:00</option><option>07:30</option><option>08:00</option><option>08:30</option><option>09:00</option><option>09:30</option><option>10:00</option><option>10:30</option><option>11:00</option><option>11:30</option><option selected>12:00</option><option>12:30</option><option>13:00</option><option>13:30</option><option>14:00</option><option>14:30</option><option>15:00</option><option>15:30</option><option>16:00</option><option>16:30</option><option>17:00</option><option>17:30</option><option>18:00</option><option>18:30</option><option>19:00</option><option>19:30</option><option>20:00</option><option>20:30</option><option>21:00</option><option>21:30</option><option>22:00</option><option>22:30</option><option>23:00</option><option>23:30</option></select>
+              <div class="time-note">ברירת מחדל לכל חזרה</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="section">
+        <div class="section-title"><span class="section-title-icon">📝</span> הערות מפקד</div>
+        <div class="section-body">
+          <textarea class="field-input" rows="3">חייל אמין, מומלץ לתפקידי מ"כ בפועל בעתיד.</textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>

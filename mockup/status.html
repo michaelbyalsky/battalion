@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440" />
+  <title>מצב חיילים — Wireframe</title>
+  <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Heebo', sans-serif; background: #f5f5f5; color: #1a1a1a; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+    .topbar { height: 52px; background: #fff; border-bottom: 2px solid #1a1a1a; display: flex; align-items: center; padding: 0 24px; gap: 20px; flex-shrink: 0; }
+    .topbar-logo { font-size: 15px; font-weight: 700; }
+    .topbar-sep  { width: 1px; height: 24px; background: #ccc; }
+    .topbar-title { font-size: 14px; font-weight: 600; flex: 1; }
+    .topbar-nav { display: flex; gap: 2px; }
+    .nav-btn { border: 1px solid #ccc; background: #fff; border-radius: 4px; padding: 4px 10px; font-family: inherit; font-size: 13px; cursor: pointer; color: #555; }
+    .nav-btn.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+    .topbar-btn { border: 2px solid #1a1a1a; background: #1a1a1a; color: #fff; border-radius: 4px; padding: 5px 14px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .topbar-ghost { border: 1px solid #ccc; background: #fff; color: #1a1a1a; border-radius: 4px; padding: 5px 14px; font-family: inherit; font-size: 13px; cursor: pointer; }
+
+    .toolbar { height: 44px; background: #fff; border-bottom: 1px solid #ddd; display: flex; align-items: center; padding: 0 24px; gap: 12px; flex-shrink: 0; }
+    .toolbar-label { font-size: 12px; color: #999; font-weight: 600; }
+    .legend { display: flex; gap: 14px; align-items: center; margin-right: auto; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #555; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+    .dot-present  { background: #d4edda; border: 1px solid #aaa; }
+    .dot-sick     { background: #fde8d8; border: 1px solid #aaa; }
+    .dot-vacation { background: #d8eafd; border: 1px solid #aaa; }
+    .dot-out      { background: #f5f5f5; border: 1px dashed #aaa; }
+    .dot-return   { background: #fff9d8; border: 1px solid #aaa; }
+
+    .table-wrap { flex: 1; overflow: auto; }
+
+    table { border-collapse: collapse; width: max-content; min-width: 100%; }
+
+    /* ── Header ── */
+    thead th { position: sticky; top: 0; background: #fff; z-index: 10; border-bottom: 2px solid #1a1a1a; border-left: 1px solid #e0e0e0; }
+    thead th.corner { position: sticky; right: 0; z-index: 20; border-left: 2px solid #1a1a1a; min-width: 180px; background: #fff; }
+    thead th.vac-header { position: sticky; right: 180px; z-index: 15; background: #fafafa; border-left: 2px dashed #ccc; min-width: 96px; }
+    .corner-inner { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #999; padding: 10px 14px; }
+    .vac-inner { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #999; padding: 10px 8px; text-align: center; }
+    .th-date { min-width: 140px; text-align: center; padding: 6px 8px 8px; }
+    .th-date.today { background: #f8f8f8; }
+    .th-date-day   { font-size: 10px; color: #999; font-weight: 600; }
+    .th-date-num   { font-size: 22px; font-weight: 700; line-height: 1.1; }
+    .th-date-month { font-size: 10px; color: #999; }
+    .th-date.today .th-date-num { text-decoration: underline; }
+
+    /* ── Body ── */
+    tbody td { border-bottom: 1px solid #e8e8e8; border-left: 1px solid #e8e8e8; height: 68px; vertical-align: middle; padding: 5px 8px; }
+    tbody td.soldier-col { position: sticky; right: 0; background: #fff; border-left: 2px solid #1a1a1a; z-index: 5; min-width: 180px; }
+    tbody td.vac-col { position: sticky; right: 180px; background: #fafafa; border-left: 2px dashed #ccc; z-index: 4; min-width: 96px; text-align: center; }
+
+    .soldier-cell { display: flex; align-items: center; gap: 10px; padding: 0 4px; }
+    .soldier-avatar { width: 30px; height: 30px; border-radius: 50%; background: #e0e0e0; border: 1px solid #bbb; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #555; flex-shrink: 0; }
+    .soldier-info { display: flex; flex-direction: column; }
+    .soldier-name { font-size: 13px; font-weight: 600; }
+    .soldier-role { font-size: 10px; color: #999; }
+
+    .vac-pill { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px; }
+    .vac-used { font-size: 14px; font-weight: 700; }
+    .vac-total { font-size: 10px; color: #999; }
+    .vac-bar-wrap { width: 60px; height: 4px; background: #e0e0e0; border-radius: 2px; overflow: hidden; }
+    .vac-bar { height: 100%; border-radius: 2px; }
+    .vac-bar.blue   { background: #4a90d9; }
+    .vac-bar.warn   { background: #f59e0b; }
+    .vac-bar.danger { background: #ef4444; }
+
+    tbody tr:hover td { background: #fafafa; }
+    tbody tr:hover td.soldier-col { background: #fff; }
+    tbody tr:hover td.vac-col { background: #f5f5f5; }
+
+    .cell-inner { display: flex; flex-direction: column; gap: 4px; }
+    .status-select { width: 100%; border: 1px solid #ccc; border-radius: 5px; padding: 4px 22px 4px 6px; font-family: inherit; font-size: 12px; font-weight: 500; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23999' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 6px center; height: 30px; }
+    .status-present  { background-color: #d4edda; border-color: #b3d9bb; color: #1a5c2a; }
+    .status-sick     { background-color: #fde8d8; border-color: #f5c3a0; color: #7a2e00; }
+    .status-vacation { background-color: #d8eafd; border-color: #a8c8f5; color: #0a3d7a; }
+    .status-out      { background-color: #f5f5f5; border-color: #ccc; color: #888; }
+    .status-return   { background-color: #fff9d8; border-color: #e8d96a; color: #6b5a00; }
+    .status-empty    { background-color: #fff; border-color: #e0e0e0; color: #ccc; }
+
+    .time-row { display: flex; align-items: center; gap: 5px; }
+    .time-label { font-size: 10px; color: #aaa; white-space: nowrap; }
+    .time-select { border: 1px solid #ddd; border-radius: 4px; padding: 2px 18px 2px 5px; font-family: inherit; font-size: 11px; font-weight: 600; width: 72px; background: #fff; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='8' height='5' viewBox='0 0 8 5' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L4 4L7 1' stroke='%23999' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 4px center; height: 24px; }
+    .time-default-note { font-size: 9px; color: #bbb; font-style: italic; white-space: nowrap; }
+    td.today-col { background: #fafafa !important; }
+
+    /* ── Section divider rows ── */
+    tr.section-divider td {
+      background: #1a1a1a; color: #fff;
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+      padding: 8px 14px; height: 36px; border: none;
+    }
+    tr.section-divider td.corner-cell {
+      position: sticky; right: 0; z-index: 6;
+      background: #1a1a1a; border-left: 2px solid #333;
+    }
+    tr.section-divider td.vac-cell {
+      position: sticky; right: 180px; z-index: 5;
+      background: #1a1a1a; border-left: 2px solid #333;
+    }
+
+    /* ── Company roles rows ── */
+    tr.role-row td { height: 44px; border-bottom: 1px solid #eee; border-left: 1px solid #e8e8e8; vertical-align: middle; padding: 4px 8px; }
+    tr.role-row td.role-label-col {
+      position: sticky; right: 0; background: #fafafa;
+      border-left: 2px solid #1a1a1a; z-index: 5; padding: 0 14px;
+    }
+    tr.role-row td.role-vac-col {
+      position: sticky; right: 180px; background: #f5f5f5;
+      border-left: 2px dashed #ccc; z-index: 4;
+    }
+    .role-label-inner { display: flex; flex-direction: column; }
+    .role-title { font-size: 13px; font-weight: 700; }
+    .role-holder { font-size: 10px; color: #999; }
+
+    /* Coverage cell */
+    .coverage-cell {
+      display: flex; align-items: center; justify-content: center;
+      height: 100%;
+    }
+    .cov-present { background: #d4edda; color: #1a5c2a; border: 1px solid #b3d9bb; border-radius: 6px; padding: 4px 12px; font-size: 12px; font-weight: 700; width: 90%; text-align: center; }
+    .cov-absent  { background: #fde8d8; color: #7a2e00; border: 1px solid #f5c3a0; border-radius: 6px; padding: 4px 12px; font-size: 12px; font-weight: 700; width: 90%; text-align: center; }
+    .cov-return  { background: #fff9d8; color: #6b5a00; border: 1px solid #e8d96a; border-radius: 6px; padding: 4px 12px; font-size: 12px; font-weight: 700; width: 90%; text-align: center; }
+    .cov-empty   { color: #ccc; text-align: center; font-size: 18px; width: 100%; display: block; }
+
+    /* ── Platoon sub-divider ── */
+    tr.platoon-divider td {
+      background: #3d3d3d; color: #fff;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+      padding: 6px 14px; height: 30px; border: none;
+    }
+    tr.platoon-divider td.corner-cell {
+      position: sticky; right: 0; z-index: 6;
+      background: #3d3d3d; border-left: 2px solid #555;
+    }
+    tr.platoon-divider td.vac-cell {
+      position: sticky; right: 180px; z-index: 5;
+      background: #3d3d3d; border-left: 2px solid #555;
+    }
+
+    /* ── Platoon capability rows ── */
+    tr.cap-row td { height: 40px; border-bottom: 1px solid #eee; border-left: 1px solid #e8e8e8; vertical-align: middle; padding: 4px 8px; }
+    tr.cap-row td.cap-label-col {
+      position: sticky; right: 0; background: #fafafa;
+      border-left: 2px solid #1a1a1a; z-index: 5; padding: 0 14px;
+    }
+    tr.cap-row td.cap-vac-col {
+      position: sticky; right: 180px; background: #f5f5f5;
+      border-left: 2px dashed #ccc; z-index: 4; text-align: center;
+      font-size: 11px; color: #aaa;
+    }
+    /* Platoon-specific rows slightly indented + lighter bg */
+    tr.cap-row.platoon td.cap-label-col { background: #f8f8f8; padding-right: 22px; }
+    tr.cap-row.platoon td.cap-vac-col   { background: #f5f5f5; }
+    tr.cap-row.platoon td               { background: #fefefe; }
+    .cap-label-inner { display: flex; align-items: center; gap: 8px; }
+    .cap-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+    .cap-name { font-size: 13px; font-weight: 700; }
+    tr.cap-row.platoon .cap-name { font-size: 12px; font-weight: 600; color: #555; }
+
+    /* Count chip */
+    .count-wrap { display: flex; align-items: center; justify-content: center; }
+    .count-chip { display: inline-flex; align-items: center; gap: 4px; border-radius: 6px; padding: 4px 14px; font-size: 13px; font-weight: 700; border: 1px solid; }
+    .count-chip.good { background: #d4edda; color: #1a5c2a; border-color: #b3d9bb; }
+    .count-chip.warn { background: #fff9d8; color: #6b5a00; border-color: #e8d96a; }
+    .count-chip.bad  { background: #fde8d8; color: #7a2e00; border-color: #f5c3a0; }
+    .count-chip.zero { background: #f5f5f5; color: #bbb; border-color: #ddd; }
+    .count-chip.empty { background: #fff; color: #e0e0e0; border-color: #eee; }
+
+    /* Footer */
+    tfoot td { position: sticky; bottom: 0; background: #f0f0f0; border-top: 2px solid #1a1a1a; font-size: 11px; font-weight: 700; text-align: center; color: #555; z-index: 5; padding: 8px; }
+    tfoot td.soldier-col { position: sticky; right: 0; bottom: 0; z-index: 20; background: #e8e8e8; border-left: 2px solid #1a1a1a; text-align: right; padding: 8px 14px; font-size: 12px; }
+    tfoot td.vac-col { position: sticky; right: 180px; bottom: 0; z-index: 19; background: #e8e8e8; border-left: 2px dashed #ccc; }
+    .avail-count { color: #1a5c2a; font-size: 14px; font-weight: 700; }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-logo">מערכת פיקוד</div>
+    <div class="topbar-sep"></div>
+    <div class="topbar-title">מצב כוח אדם</div>
+    <div class="topbar-nav">
+      <button class="nav-btn">‹ שבוע קודם</button>
+      <button class="nav-btn active">שבוע נוכחי</button>
+      <button class="nav-btn">שבוע הבא ›</button>
+    </div>
+    <button class="topbar-ghost">ייצוא Excel</button>
+    <button class="topbar-btn">+ הוסף חייל</button>
+  </div>
+
+  <div class="toolbar">
+    <div class="toolbar-label">מקרא:</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot dot-present"></div> קיים</div>
+      <div class="legend-item"><div class="legend-dot dot-sick"></div> מחלה</div>
+      <div class="legend-item"><div class="legend-dot dot-vacation"></div> חופשה</div>
+      <div class="legend-item"><div class="legend-dot dot-out"></div> יציאה</div>
+      <div class="legend-item"><div class="legend-dot dot-return"></div> חזרה</div>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+
+      <!-- ═══════ HEADER ═══════ -->
+      <thead>
+        <tr>
+          <th class="corner"><div class="corner-inner">חייל</div></th>
+          <th class="vac-header"><div class="vac-inner">ימי חופש<br/>שנוצלו</div></th>
+          <th><div class="th-date"><div class="th-date-day">רביעי</div><div class="th-date-num">05</div><div class="th-date-month">מרץ</div></div></th>
+          <th><div class="th-date"><div class="th-date-day">חמישי</div><div class="th-date-num">06</div><div class="th-date-month">מרץ</div></div></th>
+          <th><div class="th-date today"><div class="th-date-day">שבת · היום</div><div class="th-date-num">07</div><div class="th-date-month">מרץ</div></div></th>
+          <th><div class="th-date"><div class="th-date-day">ראשון</div><div class="th-date-num">08</div><div class="th-date-month">מרץ</div></div></th>
+          <th><div class="th-date"><div class="th-date-day">שני</div><div class="th-date-num">09</div><div class="th-date-month">מרץ</div></div></th>
+          <th><div class="th-date"><div class="th-date-day">שלישי</div><div class="th-date-num">10</div><div class="th-date-month">מרץ</div></div></th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <!-- ═══════ SOLDIERS ═══════ -->
+
+        <!-- ── מפלג ── -->
+        <tr class="section-divider">
+          <td class="corner-cell">מפלג</td>
+          <td class="vac-cell"></td>
+          <td colspan="6"></td>
+        </tr>
+        <tr>
+          <td class="soldier-col"><div class="soldier-cell"><div class="soldier-avatar">רא</div><div class="soldier-info"><div class="soldier-name">רס"ן אריאל</div><div class="soldier-role">מ"פ</div></div></div></td>
+          <td class="vac-col"><div class="vac-pill"><div class="vac-used">2</div><div class="vac-total">מתוך 14</div><div class="vac-bar-wrap"><div class="vac-bar blue" style="width:14%"></div></div></div></td>
+          <td><select class="status-select status-present"><option>קיים</option></select></td>
+          <td><select class="status-select status-present"><option>קיים</option></select></td>
+          <td class="today-col"><select class="status-select status-present"><option>קיים</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+        </tr>
+        <tr>
+          <td class="soldier-col"><div class="soldier-cell"><div class="soldier-avatar">סכ</div><div class="soldier-info"><div class="soldier-name">סרן כהן</div><div class="soldier-role">סמ"פ</div></div></div></td>
+          <td class="vac-col"><div class="vac-pill"><div class="vac-used">1</div><div class="vac-total">מתוך 14</div><div class="vac-bar-wrap"><div class="vac-bar blue" style="width:7%"></div></div></div></td>
+          <td><select class="status-select status-present"><option>קיים</option></select></td>
+          <td><select class="status-select status-vacation"><option>חופשה</option></select></td>
+          <td class="today-col"><select class="status-select status-vacation"><option>חופשה</option></select></td>
+          <td><div class="cell-inner"><select class="status-select status-return"><option>חזרה</option></select><div class="time-row"><span class="time-label">שעה:</span><select class="time-select"><option selected>12:00</option></select><span class="time-default-note">(ברירת מחדל)</span></div></div></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+        </tr>
+        <tr>
+          <td class="soldier-col"><div class="soldier-cell"><div class="soldier-avatar">רמ</div><div class="soldier-info"><div class="soldier-name">רס"ר מזרחי</div><div class="soldier-role">רס"פ</div></div></div></td>
+          <td class="vac-col"><div class="vac-pill"><div class="vac-used">0</div><div class="vac-total">מתוך 14</div><div class="vac-bar-wrap"><div class="vac-bar blue" style="width:0%"></div></div></div></td>
+          <td><select class="status-select status-present"><option>קיים</option></select></td>
+          <td><select class="status-select status-present"><option>קיים</option></select></td>
+          <td class="today-col"><select class="status-select status-present"><option>קיים</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+        </tr>
+        <tr>
+          <td class="soldier-col"><div class="soldier-cell"><div class="soldier-avatar">שפ</div><div class="soldier-info"><div class="soldier-name">סמ"ר פרץ</div><div class="soldier-role">שליש</div></div></div></td>
+          <td class="vac-col"><div class="vac-pill"><div class="vac-used">3</div><div class="vac-total">מתוך 14</div><div class="vac-bar-wrap"><div class="vac-bar blue" style="width:21%"></div></div></div></td>
+          <td><select class="status-select status-present"><option>קיים</option></select></td>
+          <td><div class="cell-inner"><select class="status-select status-out"><option>יציאה</option></select><div class="time-row"><span class="time-label">שעה:</span><select class="time-select"><option selected>14:00</option></select></div></div></td>
+          <td class="today-col"><div class="cell-inner"><select class="status-select status-return"><option>חזרה</option></select><div class="time-row"><span class="time-label">שעה:</span><select class="time-select"><option selected>10:00</option></select></div></div></td>
+          <td><select class="status-select status-present"><option>קיים</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+        </tr>
+
+        <!-- ── מחלקה א — מ"מ → מ"כ → חיילים ── -->
+        <tr class="platoon-divider">
+          <td class="corner-cell">מחלקה א</td>
+          <td class="vac-cell"></td>
+          <td colspan="6"></td>
+        </tr>
+        <tr>
+          <td class="soldier-col"><div class="soldier-cell"><div class="soldier-avatar">סל</div><div class="soldier-info"><div class="soldier-name">סמ"ר לוי</div><div class="soldier-role">מ"מ · MAG · LAU</div></div></div></td>
+          <td class="vac-col"><div class="vac-pill"><div class="vac-used">4</div><div class="vac-total">מתוך 14</div><div class="vac-bar-wrap"><div class="vac-bar blue" style="width:29%"></div></div></div></td>
+          <td><select class="status-select status-present"><option>קיים</option></select></td>
+          <td><select class="status-select status-present"><option>קיים</option></select></td>
+          <td class="today-col"><div class="cell-inner"><select class="status-select status-out"><option>יציאה</option></select><div class="time-row"><span class="time-label">שעה:</span><select class="time-select"><option selected>14:00</option></select></div></div></td>
+          <td><div class="cell-inner"><select class="status-select status-return"><option>חזרה</option></select><div class="time-row"><span class="time-label">שעה:</span><select class="time-select"><option selected>12:00</option></select><span class="time-default-note">(ברירת מחדל)</span></div></div></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+        </tr>
+        <tr>
+          <td class="soldier-col"><div class="soldier-cell"><div class="soldier-avatar">דנ</div><div class="soldier-info"><div class="soldier-name">דני לוי</div><div class="soldier-role">מ"כ · נגן · מטול</div></div></div></td>
+          <td class="vac-col"><div class="vac-pill"><div class="vac-used">5</div><div class="vac-total">מתוך 14</div><div class="vac-bar-wrap"><div class="vac-bar blue" style="width:36%"></div></div></div></td>
+          <td><select class="status-select status-sick"><option>מחלה</option></select></td>
+          <td><select class="status-select status-sick"><option>מחלה</option></select></td>
+          <td class="today-col"><div class="cell-inner"><select class="status-select status-return"><option>חזרה</option></select><div class="time-row"><span class="time-label">שעה:</span><select class="time-select"><option selected>16:00</option></select></div></div></td>
+          <td><select class="status-select status-present"><option>קיים</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+        </tr>
+        <tr>
+          <td class="soldier-col"><div class="soldier-cell"><div class="soldier-avatar">אב</div><div class="soldier-info"><div class="soldier-name">אבי בן דוד</div><div class="soldier-role">לוחם · חובש</div></div></div></td>
+          <td class="vac-col"><div class="vac-pill"><div class="vac-used">3</div><div class="vac-total">מתוך 14</div><div class="vac-bar-wrap"><div class="vac-bar blue" style="width:21%"></div></div></div></td>
+          <td><select class="status-select status-present"><option>קיים</option></select></td>
+          <td><div class="cell-inner"><select class="status-select status-out"><option>יציאה</option></select><div class="time-row"><span class="time-label">שעה:</span><select class="time-select"><option selected>12:00</option></select><span class="time-default-note">(ברירת מחדל)</span></div></div></td>
+          <td class="today-col"><select class="status-select status-present"><option>קיים</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+        </tr>
+        <tr>
+          <td class="soldier-col"><div class="soldier-cell"><div class="soldier-avatar">גל</div><div class="soldier-info"><div class="soldier-name">גל מזרחי</div><div class="soldier-role">לוחם · MAG</div></div></div></td>
+          <td class="vac-col"><div class="vac-pill"><div class="vac-used">9</div><div class="vac-total">מתוך 14</div><div class="vac-bar-wrap"><div class="vac-bar warn" style="width:64%"></div></div></div></td>
+          <td><select class="status-select status-present"><option>קיים</option></select></td>
+          <td><select class="status-select status-present"><option>קיים</option></select></td>
+          <td class="today-col"><select class="status-select status-sick"><option>מחלה</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+        </tr>
+        <tr>
+          <td class="soldier-col"><div class="soldier-cell"><div class="soldier-avatar">יו</div><div class="soldier-info"><div class="soldier-name">יותם כהן</div><div class="soldier-role">לוחם · LAU</div></div></div></td>
+          <td class="vac-col"><div class="vac-pill"><div class="vac-used">13</div><div class="vac-total">מתוך 14</div><div class="vac-bar-wrap"><div class="vac-bar danger" style="width:93%"></div></div></div></td>
+          <td><div class="cell-inner"><select class="status-select status-out"><option>יציאה</option></select><div class="time-row"><span class="time-label">שעה:</span><select class="time-select"><option selected>09:00</option></select></div></div></td>
+          <td><select class="status-select status-vacation"><option>חופשה</option></select></td>
+          <td class="today-col"><select class="status-select status-vacation"><option>חופשה</option></select></td>
+          <td><select class="status-select status-vacation"><option>חופשה</option></select></td>
+          <td><div class="cell-inner"><select class="status-select status-return"><option>חזרה</option></select><div class="time-row"><span class="time-label">שעה:</span><select class="time-select"><option selected>12:00</option></select><span class="time-default-note">(ברירת מחדל)</span></div></div></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+        </tr>
+        <tr>
+          <td class="soldier-col"><div class="soldier-cell"><div class="soldier-avatar">מא</div><div class="soldier-info"><div class="soldier-name">מאור שמש</div><div class="soldier-role">לוחם · נגן</div></div></div></td>
+          <td class="vac-col"><div class="vac-pill"><div class="vac-used">2</div><div class="vac-total">מתוך 14</div><div class="vac-bar-wrap"><div class="vac-bar blue" style="width:14%"></div></div></div></td>
+          <td><select class="status-select status-vacation"><option>חופשה</option></select></td>
+          <td><select class="status-select status-vacation"><option>חופשה</option></select></td>
+          <td class="today-col"><div class="cell-inner"><select class="status-select status-return"><option>חזרה</option></select><div class="time-row"><span class="time-label">שעה:</span><select class="time-select"><option selected>12:00</option></select><span class="time-default-note">(ברירת מחדל)</span></div></div></td>
+          <td><select class="status-select status-present"><option>קיים</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><div class="cell-inner"><select class="status-select status-out"><option>יציאה</option></select><div class="time-row"><span class="time-label">שעה:</span><select class="time-select"><option selected>12:00</option></select><span class="time-default-note">(ברירת מחדל)</span></div></div></td>
+        </tr>
+        <tr>
+          <td class="soldier-col"><div class="soldier-cell"><div class="soldier-avatar">נת</div><div class="soldier-info"><div class="soldier-name">נתנאל פרץ</div><div class="soldier-role">לוחם · מטול</div></div></div></td>
+          <td class="vac-col"><div class="vac-pill"><div class="vac-used">7</div><div class="vac-total">מתוך 14</div><div class="vac-bar-wrap"><div class="vac-bar blue" style="width:50%"></div></div></div></td>
+          <td><select class="status-select status-present"><option>קיים</option></select></td>
+          <td><select class="status-select status-present"><option>קיים</option></select></td>
+          <td class="today-col"><select class="status-select status-present"><option>קיים</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+        </tr>
+
+        <!-- ── מחלקה ב — מ"מ → מ"כ → חיילים ── -->
+        <tr class="platoon-divider">
+          <td class="corner-cell">מחלקה ב</td>
+          <td class="vac-cell"></td>
+          <td colspan="6"></td>
+        </tr>
+        <tr>
+          <td class="soldier-col"><div class="soldier-cell"><div class="soldier-avatar">יש</div><div class="soldier-info"><div class="soldier-name">סמ"ל יובל שחר</div><div class="soldier-role">מ"מ · MAG</div></div></div></td>
+          <td class="vac-col"><div class="vac-pill"><div class="vac-used">6</div><div class="vac-total">מתוך 14</div><div class="vac-bar-wrap"><div class="vac-bar blue" style="width:43%"></div></div></div></td>
+          <td><select class="status-select status-present"><option>קיים</option></select></td>
+          <td><select class="status-select status-present"><option>קיים</option></select></td>
+          <td class="today-col"><select class="status-select status-present"><option>קיים</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+        </tr>
+        <tr>
+          <td class="soldier-col"><div class="soldier-cell"><div class="soldier-avatar">כל</div><div class="soldier-info"><div class="soldier-name">כרמי לוי</div><div class="soldier-role">מ"כ · מטול</div></div></div></td>
+          <td class="vac-col"><div class="vac-pill"><div class="vac-used">4</div><div class="vac-total">מתוך 14</div><div class="vac-bar-wrap"><div class="vac-bar blue" style="width:29%"></div></div></div></td>
+          <td><select class="status-select status-sick"><option>מחלה</option></select></td>
+          <td><select class="status-select status-sick"><option>מחלה</option></select></td>
+          <td class="today-col"><select class="status-select status-present"><option>קיים</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+        </tr>
+        <tr>
+          <td class="soldier-col"><div class="soldier-cell"><div class="soldier-avatar">עב</div><div class="soldier-info"><div class="soldier-name">עופר בן דוד</div><div class="soldier-role">לוחם</div></div></div></td>
+          <td class="vac-col"><div class="vac-pill"><div class="vac-used">1</div><div class="vac-total">מתוך 14</div><div class="vac-bar-wrap"><div class="vac-bar blue" style="width:7%"></div></div></div></td>
+          <td><select class="status-select status-present"><option>קיים</option></select></td>
+          <td><select class="status-select status-present"><option>קיים</option></select></td>
+          <td class="today-col"><select class="status-select status-present"><option>קיים</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+        </tr>
+        <tr>
+          <td class="soldier-col"><div class="soldier-cell"><div class="soldier-avatar">אח</div><div class="soldier-info"><div class="soldier-name">אביב חי</div><div class="soldier-role">לוחם · חובש</div></div></div></td>
+          <td class="vac-col"><div class="vac-pill"><div class="vac-used">8</div><div class="vac-total">מתוך 14</div><div class="vac-bar-wrap"><div class="vac-bar warn" style="width:57%"></div></div></div></td>
+          <td><select class="status-select status-vacation"><option>חופשה</option></select></td>
+          <td><select class="status-select status-vacation"><option>חופשה</option></select></td>
+          <td class="today-col"><div class="cell-inner"><select class="status-select status-return"><option>חזרה</option></select><div class="time-row"><span class="time-label">שעה:</span><select class="time-select"><option selected>12:00</option></select><span class="time-default-note">(ברירת מחדל)</span></div></div></td>
+          <td><select class="status-select status-present"><option>קיים</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+        </tr>
+
+        <!-- ── מחלקה ג — מ"מ → מ"כ → חיילים ── -->
+        <tr class="platoon-divider">
+          <td class="corner-cell">מחלקה ג</td>
+          <td class="vac-cell"></td>
+          <td colspan="6"></td>
+        </tr>
+        <tr>
+          <td class="soldier-col"><div class="soldier-cell"><div class="soldier-avatar">רה</div><div class="soldier-info"><div class="soldier-name">סמ"ל רועי הרצל</div><div class="soldier-role">מ"מ · נגב</div></div></div></td>
+          <td class="vac-col"><div class="vac-pill"><div class="vac-used">5</div><div class="vac-total">מתוך 14</div><div class="vac-bar-wrap"><div class="vac-bar blue" style="width:36%"></div></div></div></td>
+          <td><select class="status-select status-present"><option>קיים</option></select></td>
+          <td><select class="status-select status-present"><option>קיים</option></select></td>
+          <td class="today-col"><select class="status-select status-present"><option>קיים</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+        </tr>
+        <tr>
+          <td class="soldier-col"><div class="soldier-cell"><div class="soldier-avatar">עג</div><div class="soldier-info"><div class="soldier-name">עמיחי גנים</div><div class="soldier-role">מ"כ · LAU</div></div></div></td>
+          <td class="vac-col"><div class="vac-pill"><div class="vac-used">2</div><div class="vac-total">מתוך 14</div><div class="vac-bar-wrap"><div class="vac-bar blue" style="width:14%"></div></div></div></td>
+          <td><select class="status-select status-present"><option>קיים</option></select></td>
+          <td><div class="cell-inner"><select class="status-select status-out"><option>יציאה</option></select><div class="time-row"><span class="time-label">שעה:</span><select class="time-select"><option selected>12:00</option></select><span class="time-default-note">(ברירת מחדל)</span></div></div></td>
+          <td class="today-col"><div class="cell-inner"><select class="status-select status-return"><option>חזרה</option></select><div class="time-row"><span class="time-label">שעה:</span><select class="time-select"><option selected>18:00</option></select></div></div></td>
+          <td><select class="status-select status-present"><option>קיים</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+        </tr>
+        <tr>
+          <td class="soldier-col"><div class="soldier-cell"><div class="soldier-avatar">ימ</div><div class="soldier-info"><div class="soldier-name">יונתן מנדל</div><div class="soldier-role">לוחם · נגב</div></div></div></td>
+          <td class="vac-col"><div class="vac-pill"><div class="vac-used">11</div><div class="vac-total">מתוך 14</div><div class="vac-bar-wrap"><div class="vac-bar danger" style="width:79%"></div></div></div></td>
+          <td><select class="status-select status-vacation"><option>חופשה</option></select></td>
+          <td><select class="status-select status-vacation"><option>חופשה</option></select></td>
+          <td class="today-col"><select class="status-select status-vacation"><option>חופשה</option></select></td>
+          <td><div class="cell-inner"><select class="status-select status-return"><option>חזרה</option></select><div class="time-row"><span class="time-label">שעה:</span><select class="time-select"><option selected>12:00</option></select><span class="time-default-note">(ברירת מחדל)</span></div></div></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+          <td><select class="status-select status-empty"><option>—</option></select></td>
+        </tr>
+
+        <!-- ═══════ SECTION: COMPANY ROLES ═══════ -->
+        <tr class="section-divider">
+          <td class="corner-cell" colspan="1">תפקידי פלוגה</td>
+          <td class="vac-cell" colspan="1"></td>
+          <td colspan="6"></td>
+        </tr>
+
+        <!-- מ"פ -->
+        <tr class="role-row">
+          <td class="role-label-col"><div class="role-label-inner"><div class="role-title">מ"פ</div><div class="role-holder">רס"ן אריאל</div></div></td>
+          <td class="role-vac-col"><div style="font-size:11px;font-weight:700;color:#999;text-align:center;">סה"כ: 1</div></td>
+          <td><div class="coverage-cell"><div class="cov-present">✓ קיים</div></div></td>
+          <td><div class="coverage-cell"><div class="cov-present">✓ קיים</div></div></td>
+          <td class="today-col"><div class="coverage-cell"><div class="cov-present">✓ קיים</div></div></td>
+          <td><div class="coverage-cell"><span class="cov-empty">—</span></div></td>
+          <td><div class="coverage-cell"><span class="cov-empty">—</span></div></td>
+          <td><div class="coverage-cell"><span class="cov-empty">—</span></div></td>
+        </tr>
+
+        <!-- סמ"פ -->
+        <tr class="role-row">
+          <td class="role-label-col"><div class="role-label-inner"><div class="role-title">סמ"פ</div><div class="role-holder">סרן כהן</div></div></td>
+          <td class="role-vac-col"><div style="font-size:11px;font-weight:700;color:#999;text-align:center;">סה"כ: 1</div></td>
+          <td><div class="coverage-cell"><div class="cov-present">✓ קיים</div></div></td>
+          <td><div class="coverage-cell"><div class="cov-absent">✗ חופש</div></div></td>
+          <td class="today-col"><div class="coverage-cell"><div class="cov-absent">✗ חופש</div></div></td>
+          <td><div class="coverage-cell"><div class="cov-return">↩ חזרה</div></div></td>
+          <td><div class="coverage-cell"><span class="cov-empty">—</span></div></td>
+          <td><div class="coverage-cell"><span class="cov-empty">—</span></div></td>
+        </tr>
+
+        <!-- רס"פ -->
+        <tr class="role-row">
+          <td class="role-label-col"><div class="role-label-inner"><div class="role-title">רס"פ</div><div class="role-holder">רס"ר מזרחי</div></div></td>
+          <td class="role-vac-col"><div style="font-size:11px;font-weight:700;color:#999;text-align:center;">סה"כ: 1</div></td>
+          <td><div class="coverage-cell"><div class="cov-present">✓ קיים</div></div></td>
+          <td><div class="coverage-cell"><div class="cov-present">✓ קיים</div></div></td>
+          <td class="today-col"><div class="coverage-cell"><div class="cov-present">✓ קיים</div></div></td>
+          <td><div class="coverage-cell"><span class="cov-empty">—</span></div></td>
+          <td><div class="coverage-cell"><span class="cov-empty">—</span></div></td>
+          <td><div class="coverage-cell"><span class="cov-empty">—</span></div></td>
+        </tr>
+
+        <!-- רס"ר -->
+        <tr class="role-row">
+          <td class="role-label-col"><div class="role-label-inner"><div class="role-title">רס"ר</div><div class="role-holder">רס"ר לוי</div></div></td>
+          <td class="role-vac-col"><div style="font-size:11px;font-weight:700;color:#999;text-align:center;">סה"כ: 2</div></td>
+          <td><div class="coverage-cell"><div class="cov-absent">✗ מחלה</div></div></td>
+          <td><div class="coverage-cell"><div class="cov-absent">✗ מחלה</div></div></td>
+          <td class="today-col"><div class="coverage-cell"><div class="cov-return">↩ חזרה</div></div></td>
+          <td><div class="coverage-cell"><div class="cov-present">✓ קיים</div></div></td>
+          <td><div class="coverage-cell"><span class="cov-empty">—</span></div></td>
+          <td><div class="coverage-cell"><span class="cov-empty">—</span></div></td>
+        </tr>
+
+        <!-- שליש -->
+        <tr class="role-row">
+          <td class="role-label-col"><div class="role-label-inner"><div class="role-title">שליש</div><div class="role-holder">סמ"ר פרץ</div></div></td>
+          <td class="role-vac-col"><div style="font-size:11px;font-weight:700;color:#999;text-align:center;">סה"כ: 1</div></td>
+          <td><div class="coverage-cell"><div class="cov-present">✓ קיים</div></div></td>
+          <td><div class="coverage-cell"><div class="cov-present">✓ קיים</div></div></td>
+          <td class="today-col"><div class="coverage-cell"><div class="cov-present">✓ קיים</div></div></td>
+          <td><div class="coverage-cell"><span class="cov-empty">—</span></div></td>
+          <td><div class="coverage-cell"><span class="cov-empty">—</span></div></td>
+          <td><div class="coverage-cell"><span class="cov-empty">—</span></div></td>
+        </tr>
+
+        <!-- חפ"ק מ"פ -->
+        <tr class="role-row">
+          <td class="role-label-col"><div class="role-label-inner"><div class="role-title">חפ"ק מ"פ</div><div class="role-holder">טור' ברוק</div></div></td>
+          <td class="role-vac-col"><div style="font-size:11px;font-weight:700;color:#999;text-align:center;">סה"כ: 3</div></td>
+          <td><div class="coverage-cell"><div class="cov-present">✓ קיים</div></div></td>
+          <td><div class="coverage-cell"><div class="cov-present">✓ קיים</div></div></td>
+          <td class="today-col"><div class="coverage-cell"><div class="cov-absent">✗ יציאה</div></div></td>
+          <td><div class="coverage-cell"><div class="cov-return">↩ חזרה</div></div></td>
+          <td><div class="coverage-cell"><span class="cov-empty">—</span></div></td>
+          <td><div class="coverage-cell"><span class="cov-empty">—</span></div></td>
+        </tr>
+
+        <!-- ═══════ SECTION: PLATOON CAPABILITIES ═══════ -->
+        <tr class="section-divider">
+          <td class="corner-cell" colspan="1">כישורים זמינים</td>
+          <td class="vac-cell" colspan="1"></td>
+          <td colspan="6"></td>
+        </tr>
+
+        <!-- מ"מ -->
+        <tr class="cap-row">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#4a90d9;"></div><div class="cap-name">מ"מ</div></div></td>
+          <td class="cap-vac-col">סה"כ: 3</td>
+          <td><div class="count-wrap"><div class="count-chip good">3</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">3</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip warn">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">3</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+
+        <!-- סמ"ל -->
+        <tr class="cap-row">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#7c3aed;"></div><div class="cap-name">סמ"ל</div></div></td>
+          <td class="cap-vac-col">סה"כ: 4</td>
+          <td><div class="count-wrap"><div class="count-chip good">4</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip warn">3</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip warn">3</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">4</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+
+        <!-- מ"כ -->
+        <tr class="cap-row">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#2e7d32;"></div><div class="cap-name">מ"כ</div></div></td>
+          <td class="cap-vac-col">סה"כ: 6</td>
+          <td><div class="count-wrap"><div class="count-chip good">5</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">5</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip warn">4</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">6</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+
+        <!-- חובש -->
+        <tr class="cap-row">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#880e4f;"></div><div class="cap-name">חובש</div></div></td>
+          <td class="cap-vac-col">סה"כ: 2</td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip warn">1</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip bad">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+
+        <!-- מטול -->
+        <tr class="cap-row">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#f57f17;"></div><div class="cap-name">מטול</div></div></td>
+          <td class="cap-vac-col">סה"כ: 2</td>
+          <td><div class="count-wrap"><div class="count-chip warn">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip warn">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+
+        <!-- נגב -->
+        <tr class="cap-row">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#0d47a1;"></div><div class="cap-name">נגב</div></div></td>
+          <td class="cap-vac-col">סה"כ: 2</td>
+          <td><div class="count-wrap"><div class="count-chip warn">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip warn">1</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+
+        <!-- MAG -->
+        <tr class="cap-row">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#e65100;"></div><div class="cap-name">MAG</div></div></td>
+          <td class="cap-vac-col">סה"כ: 2</td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip bad">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+
+        <!-- ── מחלקה א ── -->
+        <tr class="platoon-divider">
+          <td class="corner-cell">מחלקה א</td>
+          <td class="vac-cell"></td>
+          <td colspan="6"></td>
+        </tr>
+        <tr class="cap-row platoon">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#1565c0;"></div><div class="cap-name">מ"מ</div></div></td>
+          <td class="cap-vac-col">סה"כ: 3</td>
+          <td><div class="count-wrap"><div class="count-chip good">3</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">3</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip warn">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">3</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+        <tr class="cap-row platoon">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#00695c;"></div><div class="cap-name">סמ"ל</div></div></td>
+          <td class="cap-vac-col">סה"כ: 3</td>
+          <td><div class="count-wrap"><div class="count-chip good">3</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">3</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip good">3</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">3</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+        <tr class="cap-row platoon">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#4527a0;"></div><div class="cap-name">מ"כ</div></div></td>
+          <td class="cap-vac-col">סה"כ: 2</td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip warn">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+        <tr class="cap-row platoon">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#6a1b9a;"></div><div class="cap-name">חובש</div></div></td>
+          <td class="cap-vac-col">סה"כ: 1</td>
+          <td><div class="count-wrap"><div class="count-chip good">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">1</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip good">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+        <tr class="cap-row platoon">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#f9a825;"></div><div class="cap-name">מטול</div></div></td>
+          <td class="cap-vac-col">סה"כ: 2</td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip warn">1</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+        <tr class="cap-row platoon">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#2e7d32;"></div><div class="cap-name">נגב</div></div></td>
+          <td class="cap-vac-col">סה"כ: 1</td>
+          <td><div class="count-wrap"><div class="count-chip good">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">1</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip good">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+        <tr class="cap-row platoon">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#e65100;"></div><div class="cap-name">MAG</div></div></td>
+          <td class="cap-vac-col">סה"כ: 1</td>
+          <td><div class="count-wrap"><div class="count-chip good">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">1</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip good">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+
+        <!-- ── מחלקה ב ── -->
+        <tr class="platoon-divider">
+          <td class="corner-cell">מחלקה ב</td>
+          <td class="vac-cell"></td>
+          <td colspan="6"></td>
+        </tr>
+        <tr class="cap-row platoon">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#1565c0;"></div><div class="cap-name">מ"מ</div></div></td>
+          <td class="cap-vac-col">סה"כ: 2</td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip warn">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+        <tr class="cap-row platoon">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#00695c;"></div><div class="cap-name">סמ"ל</div></div></td>
+          <td class="cap-vac-col">סה"כ: 3</td>
+          <td><div class="count-wrap"><div class="count-chip good">3</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip warn">2</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip warn">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">3</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+        <tr class="cap-row platoon">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#4527a0;"></div><div class="cap-name">מ"כ</div></div></td>
+          <td class="cap-vac-col">סה"כ: 2</td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip warn">1</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip warn">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+        <tr class="cap-row platoon">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#6a1b9a;"></div><div class="cap-name">חובש</div></div></td>
+          <td class="cap-vac-col">סה"כ: 1</td>
+          <td><div class="count-wrap"><div class="count-chip bad">0</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">1</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip good">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+        <tr class="cap-row platoon">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#f9a825;"></div><div class="cap-name">מטול</div></div></td>
+          <td class="cap-vac-col">סה"כ: 3</td>
+          <td><div class="count-wrap"><div class="count-chip good">3</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip warn">2</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip good">3</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">3</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+        <tr class="cap-row platoon">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#2e7d32;"></div><div class="cap-name">נגב</div></div></td>
+          <td class="cap-vac-col">סה"כ: 2</td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip warn">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+        <tr class="cap-row platoon">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#e65100;"></div><div class="cap-name">MAG</div></div></td>
+          <td class="cap-vac-col">סה"כ: 1</td>
+          <td><div class="count-wrap"><div class="count-chip good">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip bad">0</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip good">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+
+        <!-- ── מחלקה ג ── -->
+        <tr class="platoon-divider">
+          <td class="corner-cell">מחלקה ג</td>
+          <td class="vac-cell"></td>
+          <td colspan="6"></td>
+        </tr>
+        <tr class="cap-row platoon">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#1565c0;"></div><div class="cap-name">מ"מ</div></div></td>
+          <td class="cap-vac-col">סה"כ: 2</td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+        <tr class="cap-row platoon">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#00695c;"></div><div class="cap-name">סמ"ל</div></div></td>
+          <td class="cap-vac-col">סה"כ: 2</td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip warn">1</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip warn">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+        <tr class="cap-row platoon">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#4527a0;"></div><div class="cap-name">מ"כ</div></div></td>
+          <td class="cap-vac-col">סה"כ: 3</td>
+          <td><div class="count-wrap"><div class="count-chip good">3</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">3</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip warn">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">3</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+        <tr class="cap-row platoon">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#6a1b9a;"></div><div class="cap-name">חובש</div></div></td>
+          <td class="cap-vac-col">סה"כ: 1</td>
+          <td><div class="count-wrap"><div class="count-chip good">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">1</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip good">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+        <tr class="cap-row platoon">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#f9a825;"></div><div class="cap-name">מטול</div></div></td>
+          <td class="cap-vac-col">סה"כ: 2</td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">2</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+        <tr class="cap-row platoon">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#2e7d32;"></div><div class="cap-name">נגב</div></div></td>
+          <td class="cap-vac-col">סה"כ: 1</td>
+          <td><div class="count-wrap"><div class="count-chip good">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">1</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip bad">0</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip good">1</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+        <tr class="cap-row platoon">
+          <td class="cap-label-col"><div class="cap-label-inner"><div class="cap-dot" style="background:#e65100;"></div><div class="cap-name">MAG</div></div></td>
+          <td class="cap-vac-col">סה"כ: 0</td>
+          <td><div class="count-wrap"><div class="count-chip zero">0</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip zero">0</div></div></td>
+          <td class="today-col"><div class="count-wrap"><div class="count-chip zero">0</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip zero">0</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+          <td><div class="count-wrap"><div class="count-chip empty">—</div></div></td>
+        </tr>
+
+      </tbody>
+
+      <tfoot>
+        <tr>
+          <td class="soldier-col">זמינים</td>
+          <td class="vac-col">—</td>
+          <td>6 / 7</td>
+          <td>5 / 7</td>
+          <td><span class="avail-count">5 / 7</span></td>
+          <td>3 / 7</td>
+          <td>—</td>
+          <td>—</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+</body>
+</html>

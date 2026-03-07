@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>הגדרת משימות</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Heebo', sans-serif; background: #0f1117; color: #e0e0e0; display: flex; height: 100vh; overflow: hidden; font-size: 14px; }
+
+    /* ── Sidebar ── */
+    #sidebar { width: 300px; min-width: 300px; background: #151820; border-left: 1px solid #1e2333; display: flex; flex-direction: column; }
+    .sidebar-header { padding: 20px 16px 14px; border-bottom: 1px solid #1e2333; display: flex; align-items: center; justify-content: space-between; }
+    .sidebar-header h2 { font-size: 16px; font-weight: 700; color: #fff; }
+    .btn-new { background: #3b82f6; color: #fff; border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-family: inherit; font-weight: 600; cursor: pointer; }
+    .btn-new:hover { background: #2563eb; }
+    .task-search { padding: 10px 12px; border-bottom: 1px solid #1e2333; }
+    .task-search input { width: 100%; background: #1e2333; border: 1px solid #2a3045; border-radius: 6px; padding: 7px 10px; color: #e0e0e0; font-family: inherit; font-size: 12px; outline: none; }
+    .task-search input::placeholder { color: #4a5270; }
+    .task-list { flex: 1; overflow-y: auto; padding: 8px 0; }
+    .group-label { font-size: 10px; font-weight: 700; color: #4a5270; letter-spacing: 0.08em; padding: 12px 16px 6px; text-transform: uppercase; }
+
+    .task-card { margin: 2px 8px; border-radius: 8px; padding: 10px 12px; cursor: pointer; border: 1px solid transparent; }
+    .task-card:hover { background: #1e2333; }
+    .task-card.active { background: #1e2333; border-color: #3b82f6; }
+    .task-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    .task-name { font-size: 13px; font-weight: 600; color: #e0e0e0; }
+    .task-badge { font-size: 10px; font-weight: 700; border-radius: 4px; padding: 2px 6px; }
+    .badge-fixed    { background: #1c3a2a; color: #4ade80; }
+    .badge-oneoff   { background: #2a3045; color: #7a8ab0; }
+    .badge-template { background: #2a1f3d; color: #a78bfa; }
+    .task-meta-row  { font-size: 11px; color: #4a5270; display: flex; gap: 8px; align-items: center; }
+    .task-type-tag  { background: #1e2333; border-radius: 3px; padding: 1px 5px; color: #7a8ab0; }
+    .task-roles-summary { font-size: 11px; color: #4a5270; }
+
+    /* ── Main ── */
+    #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .main-header { background: #151820; border-bottom: 1px solid #1e2333; padding: 16px 24px 0; }
+    .header-row1 { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .task-title-input { font-size: 20px; font-weight: 700; color: #fff; background: transparent; border: none; outline: none; font-family: inherit; flex: 1; border-bottom: 1px dashed transparent; }
+    .task-title-input:focus { border-bottom-color: #3b82f6; }
+    .task-title-input::placeholder { color: #2a3045; }
+    .recur-pill { font-size: 11px; font-weight: 700; border-radius: 20px; padding: 4px 10px; background: #1c3a2a; color: #4ade80; }
+    .oneoff-pill { background: #2a3045; color: #7a8ab0; }
+    .btn { border-radius: 6px; padding: 6px 14px; font-size: 12px; font-family: inherit; font-weight: 600; cursor: pointer; border: none; }
+    .btn-ghost  { background: transparent; border: 1px solid #2a3045; color: #7a8ab0; }
+    .btn-ghost:hover { border-color: #4a5270; color: #e0e0e0; }
+    .btn-primary { background: #3b82f6; color: #fff; }
+    .btn-primary:hover { background: #2563eb; }
+    .tab-bar { display: flex; padding: 0 24px; }
+    .tab { padding: 10px 16px; font-size: 13px; color: #4a5270; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; font-weight: 500; }
+    .tab:hover { color: #e0e0e0; }
+    .tab.active { color: #3b82f6; border-bottom-color: #3b82f6; }
+
+    .tab-content { flex: 1; overflow-y: auto; }
+    .tab-pane { display: none; padding: 24px; }
+    .tab-pane.active { display: block; }
+
+    .form-row { display: flex; gap: 16px; margin-bottom: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+    .form-group label { font-size: 11px; font-weight: 700; color: #4a5270; text-transform: uppercase; letter-spacing: 0.05em; }
+    .form-input, .form-select, .form-textarea { background: #1e2333; border: 1px solid #2a3045; border-radius: 6px; color: #e0e0e0; font-family: inherit; font-size: 13px; padding: 8px 10px; outline: none; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #3b82f6; }
+    .form-textarea { resize: vertical; min-height: 80px; }
+    .form-select option { background: #1e2333; }
+
+    .section-title { font-size: 11px; font-weight: 700; color: #4a5270; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; margin-top: 4px; }
+    .divider { height: 1px; background: #1e2333; margin: 20px 0; }
+
+    /* Role requirements */
+    .role-req-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    .role-req-row { display: flex; align-items: center; gap: 10px; background: #1a1d27; border: 1px solid #2a3045; border-radius: 8px; padding: 10px 12px; }
+    .role-req-name { font-size: 13px; font-weight: 600; color: #e0e0e0; flex: 1; }
+    .role-count-input { width: 50px; background: #2a3045; border: 1px solid #3a4060; border-radius: 5px; color: #e0e0e0; font-family: inherit; font-size: 13px; font-weight: 700; text-align: center; padding: 4px; outline: none; }
+    .role-caps-row { display: flex; gap: 4px; flex-wrap: wrap; }
+    .cap-chip { font-size: 10px; border-radius: 3px; padding: 2px 6px; font-weight: 600; cursor: pointer; }
+    .cap-on-m16    { background: #1c3a2a; color: #4ade80; }
+    .cap-on-mag    { background: #2a1800; color: #fb923c; }
+    .cap-on-lau    { background: #2d1f54; color: #c4b5fd; }
+    .cap-on-hovesh { background: #1e1040; color: #818cf8; }
+    .cap-on-matol  { background: #2a2010; color: #fbbf24; }
+    .cap-on-negev  { background: #0d2318; color: #34d399; }
+    .cap-on-nagen  { background: #1a2a40; color: #60a5fa; }
+    .cap-off { background: #1e2333; color: #4a5270; }
+    .role-req-remove { color: #4a5270; cursor: pointer; font-size: 16px; }
+    .role-req-remove:hover { color: #f87171; }
+    .btn-add-role { font-size: 11px; color: #3b82f6; background: transparent; border: 1px dashed #3b82f6; border-radius: 5px; padding: 6px 12px; cursor: pointer; font-family: inherit; width: 100%; }
+    .btn-add-role:hover { background: #1e2d4a; }
+
+    /* Prerequisites */
+    .prereq-block { background: #1a1d27; border: 1px solid #2a3045; border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
+    .prereq-header { padding: 10px 14px; background: #1e2333; border-bottom: 1px solid #2a3045; font-size: 13px; font-weight: 700; color: #e0e0e0; display: flex; justify-content: space-between; align-items: center; }
+    .prereq-rules { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+    .prereq-rule { display: flex; align-items: center; gap: 10px; background: #13161f; border: 1px solid #2a3045; border-radius: 7px; padding: 9px 12px; }
+    .prereq-rule-label { flex: 1; font-size: 13px; color: #b0b8c8; }
+    .prereq-rule-value { background: #2a3045; border: 1px solid #3a4060; border-radius: 5px; color: #e0e0e0; font-family: inherit; font-size: 13px; font-weight: 700; width: 60px; padding: 4px 8px; text-align: center; outline: none; }
+    .prereq-rule-unit { font-size: 11px; color: #4a5270; white-space: nowrap; }
+    .prereq-rule-remove { color: #4a5270; cursor: pointer; font-size: 14px; }
+    .prereq-rule-remove:hover { color: #f87171; }
+    .btn-add-prereq { font-size: 11px; color: #3b82f6; background: transparent; border: none; cursor: pointer; font-family: inherit; padding: 4px 0; }
+    .btn-add-prereq:hover { text-decoration: underline; }
+
+    /* Instructions */
+    .instr-block { background: #1a1d27; border: 1px solid #2a3045; border-radius: 8px; margin-bottom: 10px; overflow: hidden; }
+    .instr-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #1e2333; cursor: pointer; font-size: 13px; font-weight: 600; color: #e0e0e0; }
+    .instr-body { padding: 12px 14px; }
+    .checklist-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; font-size: 13px; color: #b0b8c8; }
+    .checklist-item input[type=checkbox] { margin-top: 2px; accent-color: #3b82f6; flex-shrink: 0; }
+    .btn-add-item { font-size: 11px; color: #4a5270; background: transparent; border: none; cursor: pointer; font-family: inherit; padding: 4px 0; }
+    .btn-add-item:hover { color: #3b82f6; }
+
+    /* Lessons */
+    .lessons-timeline { position: relative; padding-right: 24px; }
+    .lessons-timeline::before { content: ''; position: absolute; right: 9px; top: 0; bottom: 0; width: 2px; background: #1e2333; }
+    .lesson-item { position: relative; margin-bottom: 20px; }
+    .lesson-dot { position: absolute; right: -19px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: #3b82f6; border: 2px solid #0f1117; }
+    .lesson-date { font-size: 11px; color: #4a5270; margin-bottom: 4px; }
+    .lesson-card { background: #1a1d27; border: 1px solid #2a3045; border-radius: 8px; padding: 12px 14px; }
+    .lesson-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .lesson-title { font-size: 13px; font-weight: 600; color: #e0e0e0; }
+    .lesson-result { font-size: 11px; font-weight: 700; border-radius: 4px; padding: 2px 7px; }
+    .result-ok { background: #1c3a2a; color: #4ade80; }
+    .result-partial { background: #2a2010; color: #fbbf24; }
+    .lesson-notes { font-size: 12px; color: #7a8ab0; line-height: 1.6; }
+    .lesson-notes strong { color: #e0e0e0; }
+    .lesson-new-label { display: block; font-size: 11px; color: #4a5270; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; margin-top: 20px; }
+    .lesson-new-textarea { width: 100%; background: #1e2333; border: 1px solid #2a3045; border-radius: 6px; color: #e0e0e0; font-family: inherit; font-size: 13px; padding: 10px; outline: none; resize: vertical; min-height: 80px; }
+  </style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h2>הגדרת משימות</h2>
+    <button class="btn-new">+ משימה חדשה</button>
+  </div>
+  <div class="task-search"><input type="text" placeholder="חיפוש..."></div>
+  <div class="task-list">
+
+    <div class="group-label">משימות קבועות</div>
+    <div class="task-card active">
+      <div class="task-card-top"><span class="task-name">סיור 06:00–14:00</span><span class="task-badge badge-fixed">קבועה</span></div>
+      <div class="task-meta-row"><span class="task-type-tag">סיור</span><span>יומי</span><span>מ"כ ×1 · לוחם ×2 · נהג ×1</span></div>
+    </div>
+    <div class="task-card">
+      <div class="task-card-top"><span class="task-name">סיור 14:00–22:00</span><span class="task-badge badge-fixed">קבועה</span></div>
+      <div class="task-meta-row"><span class="task-type-tag">סיור</span><span>יומי</span><span>מ"כ ×1 · לוחם ×2</span></div>
+    </div>
+    <div class="task-card">
+      <div class="task-card-top"><span class="task-name">כיתת כוננות 24/7</span><span class="task-badge badge-fixed">קבועה</span></div>
+      <div class="task-meta-row"><span class="task-type-tag">כוננות</span><span>סבב 24 ש'</span><span>מ"כ ×1 · לוחם ×3 · חובש ×1</span></div>
+    </div>
+    <div class="task-card">
+      <div class="task-card-top"><span class="task-name">מטבח</span><span class="task-badge badge-fixed">קבועה</span></div>
+      <div class="task-meta-row"><span class="task-type-tag">לוגיסטיקה</span><span>יומי</span><span>חייל ×2</span></div>
+    </div>
+
+    <div class="group-label">משימות חד-פעמיות</div>
+    <div class="task-card">
+      <div class="task-card-top"><span class="task-name">הבאת רכב — באר שבע</span><span class="task-badge badge-oneoff">חד-פעמי</span></div>
+      <div class="task-meta-row"><span class="task-type-tag">הובלה</span><span>09.03</span><span>נהג ×1</span></div>
+    </div>
+    <div class="task-card">
+      <div class="task-card-top"><span class="task-name">תבנית סיור לילי</span><span class="task-badge badge-template">תבנית</span></div>
+      <div class="task-meta-row"><span class="task-type-tag">סיור</span><span>שימש 4×</span></div>
+    </div>
+  </div>
+</div>
+
+<div id="main">
+  <div class="main-header">
+    <div class="header-row1">
+      <input class="task-title-input" value="סיור 06:00–14:00">
+      <span class="recur-pill">קבועה · יומי</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost">שכפל</button>
+        <button class="btn btn-primary">שמור שינויים</button>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab active" onclick="switchTab('details',this)">פרטים</div>
+      <div class="tab" onclick="switchTab('roles',this)">כוח אדם נדרש</div>
+      <div class="tab" onclick="switchTab('prereqs',this)">תנאים מוקדמים</div>
+      <div class="tab" onclick="switchTab('instructions',this)">הנחיות</div>
+      <div class="tab" onclick="switchTab('lessons',this)">לקחים</div>
+    </div>
+  </div>
+
+  <div class="tab-content">
+
+    <!-- פרטים -->
+    <div class="tab-pane active" id="tab-details">
+      <div class="form-row">
+        <div class="form-group">
+          <label>סוג משימה</label>
+          <select class="form-select"><option selected>סיור</option><option>שמירה</option><option>הובלה</option><option>כוננות</option><option>לוגיסטיקה</option><option>אחר</option></select>
+        </div>
+        <div class="form-group">
+          <label>תדירות</label>
+          <select class="form-select"><option selected>קבועה · יומי</option><option>קבועה · שבועי</option><option>חד-פעמי</option></select>
+        </div>
+        <div class="form-group">
+          <label>שעת התחלה</label>
+          <input class="form-input" value="06:00">
+        </div>
+        <div class="form-group">
+          <label>שעת סיום</label>
+          <input class="form-input" value="14:00">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>מיקום ברירת מחדל</label>
+          <input class="form-input" value="גבול צפוני — עמדה 7">
+        </div>
+        <div class="form-group">
+          <label>עדיפות</label>
+          <select class="form-select"><option>רגיל</option><option selected>גבוה</option><option>דחוף</option></select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>תיאור</label>
+        <textarea class="form-textarea" rows="4">סיור בוקר לאורך קו הגבול הצפוני. הצוות יפעל בשני זוגות, עם נקודות עצירה כל 30 דקות. דיווח לתורן כל שעה.</textarea>
+      </div>
+    </div>
+
+    <!-- כוח אדם -->
+    <div class="tab-pane" id="tab-roles">
+      <div class="section-title">תפקידים נדרשים</div>
+      <div class="role-req-list">
+        <div class="role-req-row">
+          <span class="role-req-name">מ"כ</span>
+          <span style="font-size:11px;color:#4a5270">כמות:</span>
+          <input class="role-count-input" type="number" value="1">
+          <div class="role-caps-row">
+            <span class="cap-chip cap-on-m16">M16</span>
+            <span class="cap-chip cap-off">MAG</span><span class="cap-chip cap-off">LAU</span><span class="cap-chip cap-off">חובש</span>
+          </div>
+          <span class="role-req-remove">✕</span>
+        </div>
+        <div class="role-req-row">
+          <span class="role-req-name">לוחם</span>
+          <span style="font-size:11px;color:#4a5270">כמות:</span>
+          <input class="role-count-input" type="number" value="2">
+          <div class="role-caps-row">
+            <span class="cap-chip cap-on-m16">M16</span>
+            <span class="cap-chip cap-off">MAG</span><span class="cap-chip cap-off">LAU</span><span class="cap-chip cap-off">חובש</span>
+          </div>
+          <span class="role-req-remove">✕</span>
+        </div>
+        <div class="role-req-row">
+          <span class="role-req-name">נהג</span>
+          <span style="font-size:11px;color:#4a5270">כמות:</span>
+          <input class="role-count-input" type="number" value="1">
+          <div class="role-caps-row">
+            <span class="cap-chip cap-on-nagen">נגן</span>
+            <span class="cap-chip cap-off">MAG</span><span class="cap-chip cap-off">חובש</span>
+          </div>
+          <span class="role-req-remove">✕</span>
+        </div>
+      </div>
+      <button class="btn-add-role">+ הוסף תפקיד</button>
+    </div>
+
+    <!-- תנאים מוקדמים -->
+    <div class="tab-pane" id="tab-prereqs">
+      <div style="font-size:13px;color:#7a8ab0;margin-bottom:20px;line-height:1.6;">תנאים אלו ייבדקו אוטומטית בעת השיבוץ. מפקד יכול לאשר חריגה במקרים מיוחדים.</div>
+
+      <div class="prereq-block">
+        <div class="prereq-header">נהג <span style="font-size:11px;color:#4a5270;font-weight:400">2 תנאים</span></div>
+        <div class="prereq-rules">
+          <div class="prereq-rule">
+            <span style="font-size:15px">🛏</span>
+            <span class="prereq-rule-label">שינה מינימלית לפני המשימה</span>
+            <input class="prereq-rule-value" type="number" value="8">
+            <span class="prereq-rule-unit">שעות</span>
+            <span class="prereq-rule-remove">✕</span>
+          </div>
+          <div class="prereq-rule">
+            <span style="font-size:15px">🕐</span>
+            <span class="prereq-rule-label">מרווח מינימלי ממשימת נהיגה קודמת</span>
+            <input class="prereq-rule-value" type="number" value="16">
+            <span class="prereq-rule-unit">שעות</span>
+            <span class="prereq-rule-remove">✕</span>
+          </div>
+          <button class="btn-add-prereq">+ הוסף תנאי לנהג</button>
+        </div>
+      </div>
+
+      <div class="prereq-block">
+        <div class="prereq-header">מ"כ <span style="font-size:11px;color:#4a5270;font-weight:400">1 תנאי</span></div>
+        <div class="prereq-rules">
+          <div class="prereq-rule">
+            <span style="font-size:15px">🛏</span>
+            <span class="prereq-rule-label">שינה מינימלית</span>
+            <input class="prereq-rule-value" type="number" value="6">
+            <span class="prereq-rule-unit">שעות</span>
+            <span class="prereq-rule-remove">✕</span>
+          </div>
+          <button class="btn-add-prereq">+ הוסף תנאי למ"כ</button>
+        </div>
+      </div>
+
+      <div class="prereq-block">
+        <div class="prereq-header">לוחם <span style="font-size:11px;color:#4a5270;font-weight:400">1 תנאי</span></div>
+        <div class="prereq-rules">
+          <div class="prereq-rule">
+            <span style="font-size:15px">🛏</span>
+            <span class="prereq-rule-label">שינה מינימלית</span>
+            <input class="prereq-rule-value" type="number" value="8">
+            <span class="prereq-rule-unit">שעות</span>
+            <span class="prereq-rule-remove">✕</span>
+          </div>
+          <button class="btn-add-prereq">+ הוסף תנאי ללוחם</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="section-title">חוקים גלובליים (ברירת מחדל לכל המשימות)</div>
+      <div class="prereq-block">
+        <div class="prereq-rules">
+          <div class="prereq-rule">
+            <span style="font-size:15px">⏱</span>
+            <span class="prereq-rule-label">מרווח מינימלי בין כל משימות</span>
+            <input class="prereq-rule-value" type="number" value="4">
+            <span class="prereq-rule-unit">שעות</span>
+            <span class="prereq-rule-remove">✕</span>
+          </div>
+          <div class="prereq-rule">
+            <span style="font-size:15px">📅</span>
+            <span class="prereq-rule-label">מקסימום משימות ביממה</span>
+            <input class="prereq-rule-value" type="number" value="2">
+            <span class="prereq-rule-unit">משימות</span>
+            <span class="prereq-rule-remove">✕</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- הנחיות -->
+    <div class="tab-pane" id="tab-instructions">
+      <div class="form-group" style="margin-bottom:20px">
+        <label>הנחיות כלליות</label>
+        <textarea class="form-textarea" rows="4">יציאה בשעה מדויקת. בדיקת ציוד 30 דקות לפני. מ"כ אחראי על דיווח שעתי. אין פעולה יחידנית בשום שלב.</textarea>
+      </div>
+      <div class="section-title">הנחיות לפי תפקיד</div>
+      <div class="instr-block">
+        <div class="instr-header">מ"כ <span>▼</span></div>
+        <div class="instr-body">
+          <textarea class="form-textarea" rows="3" style="margin-bottom:10px">אחראי ניווט ותקשורת. לדווח לתורן כל שעה. בשגיאת ניווט — עצור ודווח.</textarea>
+          <div style="font-size:11px;color:#4a5270;font-weight:700;margin-bottom:6px;text-transform:uppercase">רשימת בדיקה לפני יציאה</div>
+          <div class="checklist-item"><input type="checkbox" checked><span>בדיקת רדיו ותדרים</span></div>
+          <div class="checklist-item"><input type="checkbox" checked><span>מפה ונקודות ציון</span></div>
+          <div class="checklist-item"><input type="checkbox"><span>הנחיית הצוות על מסלול</span></div>
+          <button class="btn-add-item">+ הוסף בדיקה</button>
+        </div>
+      </div>
+      <div class="instr-block">
+        <div class="instr-header">נהג <span>▶</span></div>
+      </div>
+      <div class="instr-block">
+        <div class="instr-header">לוחם <span>▶</span></div>
+      </div>
+    </div>
+
+    <!-- לקחים -->
+    <div class="tab-pane" id="tab-lessons">
+      <div style="font-size:13px;color:#7a8ab0;margin-bottom:20px;line-height:1.6;">לקחים נאספים מכל ריצה של המשימה ומשמשים לשיפור הנחיות ותנאים מוקדמים.</div>
+      <div class="section-title">ריצות קודמות</div>
+      <div class="lessons-timeline">
+        <div class="lesson-item">
+          <div class="lesson-dot"></div>
+          <div class="lesson-date">05.03.2026 · 06:00–14:00</div>
+          <div class="lesson-card">
+            <div class="lesson-card-header"><span class="lesson-title">סיור 06–14 · גבול צפוני</span><span class="lesson-result result-ok">הושלם</span></div>
+            <div class="lesson-notes"><strong>לקח:</strong> רדיו בתדר 42 קיבל הפרעות בנקודה הצפון-מזרחית — מומלץ לעבור לתדר 44 באזור זה.</div>
+          </div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-dot" style="background:#f59e0b"></div>
+          <div class="lesson-date">28.02.2026 · 06:00–14:00</div>
+          <div class="lesson-card">
+            <div class="lesson-card-header"><span class="lesson-title">סיור 06–14 · גבול צפוני</span><span class="lesson-result result-partial">עיכוב</span></div>
+            <div class="lesson-notes"><strong>לקח:</strong> נהג לא קיבל מנוחה מספיקה — הוסף תנאי 8 שעות שינה לנהג.</div>
+          </div>
+        </div>
+      </div>
+      <span class="lesson-new-label">לקחים מהריצה האחרונה</span>
+      <textarea class="lesson-new-textarea" placeholder="הוסף לקחים, ממצאים והמלצות..."></textarea>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn btn-primary" style="font-size:12px">שמור לקחים</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function switchTab(id, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('tab-' + id).classList.add('active');
+  }
+  document.querySelectorAll('.task-card').forEach(c => {
+    c.addEventListener('click', () => {
+      document.querySelectorAll('.task-card').forEach(x => x.classList.remove('active'));
+      c.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

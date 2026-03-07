@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440" />
+  <title>Commander — Components</title>
+  <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:       #0f1117;
+      --surface:  #1a1d27;
+      --surface2: #22263a;
+      --border:   #2e3248;
+      --accent:   #4f6ef7;
+      --accent2:  #7c3aed;
+      --green:    #22c55e;
+      --red:      #ef4444;
+      --amber:    #f59e0b;
+      --text:     #e8eaf6;
+      --muted:    #7b82a8;
+    }
+    body {
+      font-family: 'Heebo', sans-serif;
+      background: #0a0c12;
+      color: var(--text);
+      padding: 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 64px;
+    }
+
+    /* ── Section labels ── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #3d4466;
+      margin-bottom: 20px;
+    }
+
+    .component-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    /* ────────────────────────────
+       1. BRAND / LOGO
+    ──────────────────────────── */
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 18px;
+    }
+    .brand-icon {
+      width: 38px; height: 38px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; color: #fff;
+    }
+    .brand-name { font-size: 15px; font-weight: 700; }
+    .brand-sub  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* ────────────────────────────
+       2. NAV ITEM
+    ──────────────────────────── */
+    .nav-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      cursor: pointer;
+      min-width: 180px;
+    }
+    .nav-item.default { color: var(--muted); }
+    .nav-item.active  { background: #1e2a5e; color: #fff; font-weight: 600; }
+    .nav-item.hover   { background: var(--surface2); color: var(--text); }
+    .nav-icon { width: 20px; text-align: center; font-size: 16px; }
+    .nav-badge {
+      margin-right: auto;
+      background: var(--red);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 20px;
+    }
+    .nav-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #3d4466; padding: 8px 16px 4px; min-width: 180px; }
+
+    /* ────────────────────────────
+       3. USER AVATAR
+    ──────────────────────────── */
+    .user-card {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+    }
+    .avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 13px;
+    }
+    .avatar-purple { background: var(--accent2); }
+    .avatar-blue   { background: #1e2a5e; }
+    .avatar-green  { background: #1a3d2b; color: var(--green); }
+    .avatar-amber  { background: #2d2400; color: var(--amber); }
+    .user-name { font-size: 13px; font-weight: 600; }
+    .user-role { font-size: 11px; color: var(--muted); }
+
+    /* ────────────────────────────
+       4. STAT CARD
+    ──────────────────────────── */
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      min-width: 180px;
+    }
+    .stat-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      margin-bottom: 14px;
+    }
+    .stat-label { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+    .stat-value { font-size: 34px; font-weight: 700; line-height: 1; }
+    .stat-sub   { font-size: 12px; color: var(--muted); margin-top: 6px; }
+    .stat-card.green .stat-icon { background: #0d2b1e; color: var(--green); }
+    .stat-card.green .stat-value { color: var(--green); }
+    .stat-card.amber .stat-icon { background: #2d2400; color: var(--amber); }
+    .stat-card.amber .stat-value { color: var(--amber); }
+    .stat-card.red   .stat-icon { background: #2d0f0f; color: var(--red); }
+    .stat-card.red   .stat-value { color: var(--red); }
+    .stat-card.blue  .stat-icon { background: #1a1f4a; color: var(--accent); }
+    .stat-card.blue  .stat-value { color: var(--accent); }
+
+    /* ────────────────────────────
+       5. BADGE / TAG
+    ──────────────────────────── */
+    .tag {
+      display: inline-block;
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .tag-pending { background: #2d2400; color: var(--amber); border: 1px solid #6b4c00; }
+    .tag-active  { background: #0d2b1e; color: var(--green); border: 1px solid #145235; }
+    .tag-done    { background: #1e2038; color: var(--muted); border: 1px solid var(--border); }
+    .tag-urgent  { background: #2d0f0f; color: var(--red); border: 1px solid #6b1a1a; }
+
+    /* ────────────────────────────
+       6. TASK ROW
+    ──────────────────────────── */
+    .task-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      min-width: 680px;
+    }
+    .task-row.urgent { border-right: 3px solid var(--red); }
+    .task-row.normal { border-right: 3px solid var(--border); }
+    .task-name { flex: 1; font-size: 14px; font-weight: 500; }
+    .task-assignee {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; color: var(--muted);
+      min-width: 130px;
+    }
+    .soldier-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .dot-green { background: var(--green); }
+    .dot-amber { background: var(--amber); }
+    .dot-muted { background: var(--muted); }
+    .task-date { font-size: 12px; color: var(--muted); min-width: 110px; text-align: left; }
+    .task-actions { display: flex; gap: 6px; }
+
+    /* ────────────────────────────
+       7. ALERT ITEM
+    ──────────────────────────── */
+    .alert-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      min-width: 300px;
+      max-width: 340px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .alert-item.urgent { border-right: 3px solid var(--red); }
+    .alert-item.warn   { border-right: 3px solid var(--amber); }
+    .alert-item.info   { border-right: 3px solid var(--accent); }
+    .alert-row { display: flex; align-items: center; justify-content: space-between; }
+    .alert-type { font-size: 13px; font-weight: 700; }
+    .alert-type.urgent { color: var(--red); }
+    .alert-type.warn   { color: var(--amber); }
+    .alert-type.info   { color: var(--accent); }
+    .alert-time { font-size: 11px; color: var(--muted); }
+    .alert-body { font-size: 12px; color: var(--muted); }
+
+    /* ────────────────────────────
+       8. SQUAD MEMBER CARD
+    ──────────────────────────── */
+    .squad-member {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+      width: 110px;
+    }
+    .squad-avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700;
+    }
+    .squad-name { font-size: 12px; font-weight: 600; text-align: center; }
+    .squad-role { font-size: 10px; color: var(--muted); }
+    .squad-status {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+    .squad-status.ready   { background: #0d2b1e; color: var(--green); }
+    .squad-status.standby { background: #2d2400; color: var(--amber); }
+
+    /* ────────────────────────────
+       9. BUTTONS
+    ──────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 20px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary  { background: var(--accent); color: #fff; }
+    .btn-danger   { background: var(--red); color: #fff; }
+    .btn-ghost    { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-scramble {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--red);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 28px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.03em;
+    }
+    .btn-icon {
+      width: 34px; height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 15px; cursor: pointer;
+    }
+
+    /* ────────────────────────────
+       10. TOPBAR
+    ──────────────────────────── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0 24px;
+      height: 60px;
+      min-width: 900px;
+    }
+    .topbar-title { font-size: 18px; font-weight: 700; flex: 1; }
+    .topbar-date  { font-size: 13px; color: var(--muted); }
+    .alert-pill {
+      background: #2d0f0f;
+      border: 1px solid var(--red);
+      color: var(--red);
+      font-size: 12px; font-weight: 600;
+      padding: 5px 14px; border-radius: 20px;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .pulse {
+      width: 8px; height: 8px;
+      background: var(--red);
+      border-radius: 50%;
+    }
+
+    /* ────────────────────────────
+       11. PANEL HEADER
+    ──────────────────────────── */
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 20px;
+      min-width: 340px;
+    }
+    .panel-title  { font-size: 14px; font-weight: 700; }
+    .panel-action { font-size: 12px; color: var(--accent); cursor: pointer; }
+
+    /* ────────────────────────────
+       12. INPUT / SEARCH
+    ──────────────────────────── */
+    .input-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+    .input-icon {
+      position: absolute;
+      right: 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .input {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 36px 9px 14px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      width: 240px;
+      outline: none;
+    }
+    .input::placeholder { color: var(--muted); }
+    .input:focus { border-color: var(--accent); }
+
+    /* ────────────────────────────
+       13. EMPTY STATE
+    ──────────────────────────── */
+    .empty-state {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 40px 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      min-width: 300px;
+      text-align: center;
+    }
+    .empty-icon { font-size: 36px; color: var(--muted); }
+    .empty-title { font-size: 14px; font-weight: 600; }
+    .empty-sub   { font-size: 12px; color: var(--muted); }
+
+    /* ────────────────────────────
+       14. NOTIFICATION DOT
+    ──────────────────────────── */
+    .notif-wrap { position: relative; display: inline-block; }
+    .notif-dot {
+      position: absolute;
+      top: -3px; left: -3px;
+      width: 10px; height: 10px;
+      background: var(--red);
+      border-radius: 50%;
+      border: 2px solid #0a0c12;
+    }
+
+    /* dividers */
+    hr { border: none; border-top: 1px solid #1e2236; }
+  </style>
+</head>
+<body>
+
+  <!-- ── 1. Brand ── -->
+  <div>
+    <div class="section-label">Brand / Logo</div>
+    <div class="component-row">
+      <div class="brand">
+        <div class="brand-icon">★</div>
+        <div>
+          <div class="brand-name">מערכת פיקוד</div>
+          <div class="brand-sub">גדוד 77</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 2. Nav Items ── -->
+  <div>
+    <div class="section-label">Nav Item — States</div>
+    <div class="component-row">
+      <div class="nav-label">ראשי</div>
+      <div class="nav-item default"><span class="nav-icon">⊞</span> לוח בקרה</div>
+      <div class="nav-item active"><span class="nav-icon">⚑</span> משימות <span class="nav-badge">3</span></div>
+      <div class="nav-item hover"><span class="nav-icon">☰</span> כוננות</div>
+      <div class="nav-item default"><span class="nav-icon">♟</span> חיילים</div>
+      <div class="nav-item default"><span class="nav-icon">◫</span> לוח משמרות</div>
+      <div class="nav-item default"><span class="nav-icon">✉</span> הודעות <span class="nav-badge">1</span></div>
+    </div>
+  </div>
+
+  <!-- ── 3. Avatar / User ── -->
+  <div>
+    <div class="section-label">User Card</div>
+    <div class="component-row">
+      <div class="user-card">
+        <div class="avatar avatar-purple">רם</div>
+        <div>
+          <div class="user-name">רם כהן</div>
+          <div class="user-role">מפקד פלוגה</div>
+        </div>
+      </div>
+      <div class="user-card">
+        <div class="avatar avatar-green">סל</div>
+        <div>
+          <div class="user-name">סמ"ר לוי</div>
+          <div class="user-role">מ"כ</div>
+        </div>
+      </div>
+      <div class="user-card">
+        <div class="avatar avatar-amber">חד</div>
+        <div>
+          <div class="user-name">טור' חדד</div>
+          <div class="user-role">לוחם</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 4. Stat Cards ── -->
+  <div>
+    <div class="section-label">Stat Card</div>
+    <div class="component-row">
+      <div class="stat-card green">
+        <div class="stat-icon">●</div>
+        <div class="stat-label">חיילים זמינים</div>
+        <div class="stat-value">38</div>
+        <div class="stat-sub">מתוך 42 בגדוד</div>
+      </div>
+      <div class="stat-card amber">
+        <div class="stat-icon">⚑</div>
+        <div class="stat-label">משימות פעילות</div>
+        <div class="stat-value">7</div>
+        <div class="stat-sub">3 ממתינות לשיבוץ</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-icon">✕</div>
+        <div class="stat-label">חיילים בחופשה / מחלה</div>
+        <div class="stat-value">4</div>
+        <div class="stat-sub">חזרה צפויה: מחר</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-icon">★</div>
+        <div class="stat-label">כוננות — מוכנות</div>
+        <div class="stat-value">100%</div>
+        <div class="stat-sub">6 חיילים בסד"כ</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 5. Tags / Badges ── -->
+  <div>
+    <div class="section-label">Tags &amp; Badges</div>
+    <div class="component-row" style="align-items:center; gap:12px;">
+      <span class="tag tag-active">פעיל</span>
+      <span class="tag tag-pending">ממתין</span>
+      <span class="tag tag-urgent">דחוף</span>
+      <span class="tag tag-done">הושלם</span>
+    </div>
+  </div>
+
+  <!-- ── 6. Task Rows ── -->
+  <div>
+    <div class="section-label">Task Row</div>
+    <div class="component-row" style="flex-direction:column;">
+      <div class="task-row urgent">
+        <div class="task-name">סיור לילי — גזרה צפון</div>
+        <div class="task-assignee"><span class="soldier-dot dot-green"></span>סמ"ר לוי</div>
+        <span class="tag tag-urgent">דחוף</span>
+        <span class="tag tag-active">פעיל</span>
+        <div class="task-date">07.03 · 22:00</div>
+        <div class="task-actions">
+          <div class="btn-icon">✎</div>
+          <div class="btn-icon">⋯</div>
+        </div>
+      </div>
+      <div class="task-row normal">
+        <div class="task-name">אחזקת כלי רכב</div>
+        <div class="task-assignee"><span class="soldier-dot dot-amber"></span>טור' ברוק</div>
+        <span class="tag tag-pending">רגיל</span>
+        <span class="tag tag-pending">ממתין</span>
+        <div class="task-date">08.03 · 08:00</div>
+        <div class="task-actions">
+          <div class="btn-icon">✎</div>
+          <div class="btn-icon">⋯</div>
+        </div>
+      </div>
+      <div class="task-row normal">
+        <div class="task-name">הדרכת נהגים</div>
+        <div class="task-assignee"><span class="soldier-dot dot-muted"></span>לא שובץ</div>
+        <span class="tag tag-pending">רגיל</span>
+        <span class="tag tag-pending">ממתין</span>
+        <div class="task-date">09.03 · 09:00</div>
+        <div class="task-actions">
+          <div class="btn-icon">✎</div>
+          <div class="btn-icon">⋯</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 7. Alert Items ── -->
+  <div>
+    <div class="section-label">Alert Item</div>
+    <div class="component-row">
+      <div class="alert-item urgent">
+        <div class="alert-row">
+          <div class="alert-type urgent">הגעה לא מדווחת</div>
+          <div class="alert-time">14:10</div>
+        </div>
+        <div class="alert-body">טור' מזרחי לא הגיע לעמדה</div>
+      </div>
+      <div class="alert-item warn">
+        <div class="alert-row">
+          <div class="alert-type warn">משימה ממתינה לשיבוץ</div>
+          <div class="alert-time">13:45</div>
+        </div>
+        <div class="alert-body">הדרכת נהגים — אין חייל משובץ</div>
+      </div>
+      <div class="alert-item info">
+        <div class="alert-row">
+          <div class="alert-type info">חייל חזר מחופשה</div>
+          <div class="alert-time">12:30</div>
+        </div>
+        <div class="alert-body">סמ"ר לוי זמין לשיבוץ</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 8. Squad Member ── -->
+  <div>
+    <div class="section-label">Squad Member Card</div>
+    <div class="component-row">
+      <div class="squad-member">
+        <div class="squad-avatar" style="background:#1e2a5e;">ר"מ</div>
+        <div class="squad-name">רס"ן כהן</div>
+        <div class="squad-role">מ"מ</div>
+        <div class="squad-status ready">מוכן</div>
+      </div>
+      <div class="squad-member">
+        <div class="squad-avatar" style="background:#1a3d2b;">סל</div>
+        <div class="squad-name">סמ"ר לוי</div>
+        <div class="squad-role">מ"כ</div>
+        <div class="squad-status ready">מוכן</div>
+      </div>
+      <div class="squad-member">
+        <div class="squad-avatar" style="background:#2d2400;">ברק</div>
+        <div class="squad-name">טור' ברוק</div>
+        <div class="squad-role">לוחם</div>
+        <div class="squad-status standby">המתנה</div>
+      </div>
+      <div class="squad-member">
+        <div class="squad-avatar" style="background:#2d0f0f; color:#ef4444;">מז</div>
+        <div class="squad-name">טור' מזרחי</div>
+        <div class="squad-role">לוחם</div>
+        <div class="squad-status standby">לא זמין</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 9. Buttons ── -->
+  <div>
+    <div class="section-label">Buttons</div>
+    <div class="component-row" style="align-items:center;">
+      <button class="btn btn-primary">+ משימה חדשה</button>
+      <button class="btn btn-ghost">ביטול</button>
+      <button class="btn btn-danger">מחק</button>
+      <button class="btn-scramble">⚡ כינוס כוננות</button>
+      <div class="btn-icon">✎</div>
+      <div class="btn-icon">⋯</div>
+      <div class="btn-icon">+</div>
+    </div>
+  </div>
+
+  <!-- ── 10. Topbar ── -->
+  <div>
+    <div class="section-label">Topbar</div>
+    <div class="component-row">
+      <div class="topbar">
+        <div class="topbar-title">לוח בקרה</div>
+        <div class="topbar-date">שבת, 7 במרץ 2026 · 14:22</div>
+        <div class="alert-pill"><span class="pulse"></span> 2 התראות פעילות</div>
+        <button class="btn btn-primary">+ משימה חדשה</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 11. Panel Header ── -->
+  <div>
+    <div class="section-label">Panel Header</div>
+    <div class="component-row">
+      <div class="panel-header">
+        <div class="panel-title">משימות פעילות</div>
+        <div class="panel-action">הצג הכל ›</div>
+      </div>
+      <div class="panel-header">
+        <div class="panel-title">התראות אחרונות</div>
+        <div class="panel-action">נקה הכל</div>
+      </div>
+      <div class="panel-header">
+        <div class="panel-title">כוננות פעילה</div>
+        <div class="panel-action">ערוך</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 12. Input / Search ── -->
+  <div>
+    <div class="section-label">Input / Search</div>
+    <div class="component-row">
+      <div class="input-wrap">
+        <span class="input-icon">⌕</span>
+        <input class="input" placeholder="חיפוש חייל..." />
+      </div>
+      <div class="input-wrap">
+        <span class="input-icon">⌕</span>
+        <input class="input" placeholder="חיפוש משימה..." />
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 13. Empty State ── -->
+  <div>
+    <div class="section-label">Empty State</div>
+    <div class="component-row">
+      <div class="empty-state">
+        <div class="empty-icon">⚑</div>
+        <div class="empty-title">אין משימות פעילות</div>
+        <div class="empty-sub">לחץ על "משימה חדשה" כדי להוסיף</div>
+        <button class="btn btn-primary" style="margin-top:8px;">+ משימה חדשה</button>
+      </div>
+      <div class="empty-state">
+        <div class="empty-icon">🔔</div>
+        <div class="empty-title">אין התראות</div>
+        <div class="empty-sub">הכל תקין</div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

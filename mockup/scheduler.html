@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>שיבוץ יומי</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Heebo', sans-serif; background: #0f1117; color: #e0e0e0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; font-size: 14px; }
+
+    /* ── Topbar ── */
+    #topbar { background: #151820; border-bottom: 1px solid #1e2333; display: flex; align-items: center; gap: 14px; padding: 0 20px; height: 50px; flex-shrink: 0; }
+    .topbar-title { font-size: 15px; font-weight: 700; color: #fff; }
+    .tsep { width: 1px; height: 22px; background: #1e2333; }
+    .tspacer { flex: 1; }
+    .week-nav { display: flex; align-items: center; gap: 6px; }
+    .week-nav button { background: #1e2333; border: 1px solid #2a3045; border-radius: 5px; color: #b0b8c8; font-family: inherit; font-size: 12px; padding: 3px 9px; cursor: pointer; }
+    .week-nav button:hover { background: #2a3045; }
+    .week-label { font-size: 12px; color: #7a8ab0; }
+    .legend { display: flex; align-items: center; gap: 10px; font-size: 11px; color: #4a5270; }
+    .ldot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+
+    /* ── Date strip ── */
+    #date-strip { background: #151820; border-bottom: 2px solid #1e2333; display: flex; align-items: stretch; padding: 0 20px; overflow-x: auto; flex-shrink: 0; height: 70px; }
+    #date-strip::-webkit-scrollbar { height: 3px; }
+    #date-strip::-webkit-scrollbar-thumb { background: #2a3045; border-radius: 2px; }
+    .date-pill { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 66px; padding: 6px 10px; cursor: pointer; border-bottom: 3px solid transparent; transition: background 0.1s; }
+    .date-pill:hover { background: #1e2333; }
+    .date-pill.selected { border-bottom-color: #3b82f6; background: #1a1d2e; }
+    .dp-day { font-size: 10px; font-weight: 600; color: #4a5270; letter-spacing: 0.03em; }
+    .dp-num { font-size: 21px; font-weight: 700; line-height: 1; color: #e0e0e0; }
+    .date-pill.today .dp-num { color: #3b82f6; }
+    .dp-dots { display: flex; gap: 3px; height: 7px; align-items: center; }
+    .dp-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+    /* ── Layout ── */
+    #content { flex: 1; display: flex; overflow: hidden; }
+
+    /* ── Task grid ── */
+    #task-grid { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-wrap: wrap; gap: 16px; align-content: flex-start; }
+
+    /* Day heading row */
+    .day-row { width: 100%; display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+    .day-title { font-size: 18px; font-weight: 700; color: #fff; }
+    .day-sub   { font-size: 12px; color: #4a5270; }
+    .day-chips { display: flex; gap: 6px; }
+    .dchip { font-size: 11px; font-weight: 700; border-radius: 4px; padding: 2px 8px; }
+    .dchip-ok  { background: #1c3a2a; color: #4ade80; }
+    .dchip-p   { background: #2a2010; color: #fbbf24; }
+    .dchip-b   { background: #3b0d0d; color: #f87171; }
+
+    .section-sep { width: 100%; font-size: 10px; font-weight: 700; color: #4a5270; letter-spacing: 0.07em; text-transform: uppercase; padding-bottom: 6px; border-bottom: 1px solid #1e2333; }
+
+    /* ── Task card (square) ── */
+    .task-card {
+      background: #151820; border: 1px solid #1e2333; border-radius: 12px;
+      width: 300px; display: flex; flex-direction: column; overflow: hidden;
+      border-top: 3px solid #2a3045;
+    }
+    .task-card.status-full    { border-top-color: #22c55e; }
+    .task-card.status-partial { border-top-color: #f59e0b; }
+    .task-card.status-blocked { border-top-color: #ef4444; }
+    .task-card.status-override{ border-top-color: #a855f7; }
+
+    .card-header { padding: 12px 14px 10px; border-bottom: 1px solid #1e2333; }
+    .card-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    .card-name { font-size: 14px; font-weight: 700; color: #fff; }
+    .card-badge { font-size: 10px; font-weight: 700; border-radius: 4px; padding: 2px 6px; }
+    .cb-full     { background: #1c3a2a; color: #4ade80; }
+    .cb-partial  { background: #2a2010; color: #fbbf24; }
+    .cb-blocked  { background: #3b0d0d; color: #f87171; }
+    .cb-override { background: #2d1657; color: #c4b5fd; }
+    .cb-empty    { background: #1e2333; color: #4a5270; }
+    .card-time { font-size: 11px; color: #4a5270; }
+    .card-req { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 5px; }
+    .req-chip { font-size: 10px; background: #1e2333; color: #7a8ab0; border-radius: 3px; padding: 1px 5px; }
+
+    .card-body { padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+
+    /* Role section inside card */
+    .role-section { display: flex; flex-direction: column; gap: 5px; }
+    .role-label { font-size: 10px; font-weight: 700; color: #4a5270; text-transform: uppercase; letter-spacing: 0.05em; }
+    .role-slots { display: flex; flex-direction: column; gap: 4px; }
+
+    /* Filled slot */
+    .slot-filled {
+      display: flex; align-items: center; gap: 7px;
+      border-radius: 7px; padding: 5px 8px; font-size: 12px;
+    }
+    .slot-ok       { background: #0d1f15; border: 1px solid #166534; }
+    .slot-warn     { background: #150e05; border: 1px solid #78350f; }
+    .slot-blocked  { background: #150d0d; border: 1px solid #7f1d1d; }
+    .slot-override { background: #150e1a; border: 1px solid #7e22ce; }
+    .s-av { width: 20px; height: 20px; border-radius: 50%; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .av-b { background: #1d3557; color: #7eb8f7; }
+    .av-g { background: #1c3a2a; color: #4ade80; }
+    .av-p { background: #2d1f54; color: #c4b5fd; }
+    .av-r { background: #3b0d0d; color: #fca5a5; }
+    .av-y { background: #2a2010; color: #fbbf24; }
+    .av-t { background: #0d2a2a; color: #5eead4; }
+    .s-name { flex: 1; font-weight: 600; color: #e0e0e0; }
+    .s-flag { font-size: 10px; }
+    .s-rm { color: #2a3045; cursor: pointer; font-size: 12px; line-height: 1; }
+    .s-rm:hover { color: #f87171; }
+
+    /* Empty slot — drop target or type-to-search */
+    .slot-empty {
+      display: flex; align-items: center; gap: 6px;
+      border: 1px dashed #2a3045; border-radius: 7px; padding: 4px 8px;
+      cursor: pointer; position: relative;
+    }
+    .slot-empty:hover { border-color: #3b82f6; background: #131b2e; }
+    .slot-empty.drag-over { border-color: #3b82f6; background: #1e2d4a; border-style: solid; }
+    .slot-empty-label { font-size: 11px; color: #2a3045; flex: 1; }
+    .slot-empty:hover .slot-empty-label { color: #4a7ab5; }
+    .slot-plus { font-size: 14px; color: #2a3045; line-height: 1; }
+    .slot-empty:hover .slot-plus { color: #3b82f6; }
+
+    /* Inline search dropdown */
+    .slot-input-wrap { position: relative; flex: 1; }
+    .slot-input {
+      width: 100%; background: transparent; border: none; outline: none;
+      color: #e0e0e0; font-family: inherit; font-size: 11px; padding: 0;
+    }
+    .slot-input::placeholder { color: #2a3045; }
+    .slot-dropdown {
+      position: absolute; top: calc(100% + 6px); right: 0; left: 0;
+      background: #1e2333; border: 1px solid #2a3045; border-radius: 7px;
+      z-index: 100; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    .slot-dropdown-item {
+      display: flex; align-items: center; gap: 8px; padding: 7px 10px; cursor: pointer; font-size: 12px;
+    }
+    .slot-dropdown-item:hover { background: #2a3045; }
+    .sdi-name { flex: 1; font-weight: 600; color: #e0e0e0; }
+    .sdi-status { font-size: 10px; font-weight: 700; border-radius: 3px; padding: 1px 5px; }
+    .sdi-ok   { background: #1c3a2a; color: #4ade80; }
+    .sdi-warn { background: #2a2010; color: #fbbf24; }
+
+    /* Add one-off card */
+    .add-task-card {
+      width: 300px; border: 1px dashed #1e2333; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100px; cursor: pointer; color: #2a3045; font-size: 13px;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .add-task-card:hover { border-color: #3b82f6; color: #3b82f6; background: #0f1520; }
+
+    /* ── Soldiers sidebar ── */
+    #soldiers-panel {
+      width: 260px; min-width: 260px; background: #151820;
+      border-right: 1px solid #1e2333; display: flex; flex-direction: column; flex-shrink: 0;
+    }
+    .sp-header { padding: 14px 14px 10px; border-bottom: 1px solid #1e2333; }
+    .sp-title { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+    .sp-count { font-size: 11px; color: #4a5270; font-weight: 400; }
+    .sp-search {
+      display: flex; align-items: center; gap: 6px;
+      background: #0f1117; border: 1px solid #2a3045; border-radius: 7px; padding: 6px 10px;
+    }
+    .sp-search input { background: transparent; border: none; outline: none; color: #e0e0e0; font-family: inherit; font-size: 12px; flex: 1; }
+    .sp-search input::placeholder { color: #2a3045; }
+    .sp-search-icon { font-size: 12px; color: #4a5270; }
+
+    .sp-filters { display: flex; gap: 5px; padding: 8px 14px; border-bottom: 1px solid #1e2333; flex-wrap: wrap; }
+    .sp-filter { font-size: 10px; background: #1e2333; border: 1px solid #2a3045; border-radius: 4px; padding: 2px 7px; color: #7a8ab0; cursor: pointer; }
+    .sp-filter.active { background: #1e2d4a; border-color: #3b82f6; color: #3b82f6; }
+
+    .sp-list { flex: 1; overflow-y: auto; padding: 8px 8px; }
+
+    /* Soldier item in panel */
+    .sp-soldier {
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px 8px; border-radius: 8px; cursor: grab; margin-bottom: 3px;
+      border: 1px solid transparent; transition: background 0.1s;
+      user-select: none;
+    }
+    .sp-soldier:hover { background: #1e2333; border-color: #2a3045; }
+    .sp-soldier:active { cursor: grabbing; }
+    .sp-soldier.unavailable { opacity: 0.38; cursor: not-allowed; }
+    .sp-soldier.unavailable:hover { background: transparent; border-color: transparent; }
+    .drag-handle { font-size: 12px; color: #2a3045; cursor: grab; line-height: 1; }
+    .sp-soldier:hover .drag-handle { color: #4a5270; }
+    .sp-av { width: 30px; height: 30px; border-radius: 50%; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .sp-info { flex: 1; min-width: 0; }
+    .sp-name { font-size: 12px; font-weight: 700; color: #e0e0e0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sp-role { font-size: 10px; color: #4a5270; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sp-caps { display: flex; gap: 2px; flex-wrap: wrap; margin-top: 2px; }
+    .sp-cap { font-size: 9px; border-radius: 2px; padding: 1px 4px; font-weight: 600; }
+    .cap-m16    { background: #1c3a2a; color: #4ade80; }
+    .cap-mag    { background: #2a1800; color: #fb923c; }
+    .cap-lau    { background: #2d1f54; color: #c4b5fd; }
+    .cap-hovesh { background: #1e1040; color: #818cf8; }
+    .cap-matol  { background: #2a2010; color: #fbbf24; }
+    .cap-negev  { background: #0d2318; color: #34d399; }
+    .cap-nagen  { background: #1a2a40; color: #60a5fa; }
+    .sp-status { font-size: 10px; font-weight: 700; border-radius: 3px; padding: 2px 5px; white-space: nowrap; flex-shrink: 0; }
+    .sps-ok      { background: #1c3a2a; color: #4ade80; }
+    .sps-warn    { background: #2a2010; color: #fbbf24; }
+    .sps-busy    { background: #1e2333; color: #4a5270; }
+    .sps-blocked { background: #3b0d0d; color: #f87171; }
+  </style>
+</head>
+<body>
+
+<!-- ══ TOPBAR ══ -->
+<div id="topbar">
+  <span class="topbar-title">שיבוץ יומי</span>
+  <div class="tsep"></div>
+  <div class="week-nav">
+    <button>&#8594;</button>
+    <span class="week-label">מרץ 2026</span>
+    <button>&#8592;</button>
+  </div>
+  <div class="tspacer"></div>
+  <div class="legend">
+    <span><span class="ldot" style="background:#22c55e;margin-left:4px"></span>מלא</span>
+    <span><span class="ldot" style="background:#f59e0b;margin-left:4px"></span>חלקי</span>
+    <span><span class="ldot" style="background:#ef4444;margin-left:4px"></span>חסום</span>
+    <span><span class="ldot" style="background:#a855f7;margin-left:4px"></span>חריגה</span>
+  </div>
+</div>
+
+<!-- ══ DATE STRIP ══ -->
+<div id="date-strip">
+  <div class="date-pill today selected" onclick="selectDay(this,'שבת, 07.03.2026','היום')">
+    <span class="dp-day">שבת</span><span class="dp-num">07</span>
+    <div class="dp-dots"><span class="dp-dot" style="background:#f59e0b"></span><span class="dp-dot" style="background:#ef4444"></span></div>
+  </div>
+  <div class="date-pill" onclick="selectDay(this,'ראשון, 08.03.2026','')">
+    <span class="dp-day">ראשון</span><span class="dp-num">08</span>
+    <div class="dp-dots"><span class="dp-dot" style="background:#f59e0b"></span></div>
+  </div>
+  <div class="date-pill" onclick="selectDay(this,'שני, 09.03.2026','')">
+    <span class="dp-day">שני</span><span class="dp-num">09</span>
+    <div class="dp-dots"><span class="dp-dot" style="background:#22c55e"></span></div>
+  </div>
+  <div class="date-pill" onclick="selectDay(this,'שלישי, 10.03.2026','')">
+    <span class="dp-day">שלישי</span><span class="dp-num">10</span>
+    <div class="dp-dots"><span class="dp-dot" style="background:#2a3045"></span></div>
+  </div>
+  <div class="date-pill" onclick="selectDay(this,'רביעי, 11.03.2026','')">
+    <span class="dp-day">רביעי</span><span class="dp-num">11</span>
+    <div class="dp-dots"><span class="dp-dot" style="background:#2a3045"></span></div>
+  </div>
+  <div class="date-pill" onclick="selectDay(this,'חמישי, 12.03.2026','')">
+    <span class="dp-day">חמישי</span><span class="dp-num">12</span>
+    <div class="dp-dots"><span class="dp-dot" style="background:#2a3045"></span></div>
+  </div>
+  <div class="date-pill" onclick="selectDay(this,'שישי, 13.03.2026','')">
+    <span class="dp-day">שישי</span><span class="dp-num">13</span>
+    <div class="dp-dots"><span class="dp-dot" style="background:#2a3045"></span></div>
+  </div>
+  <div class="date-pill" onclick="selectDay(this,'שבת, 14.03.2026','')">
+    <span class="dp-day">שבת</span><span class="dp-num">14</span>
+    <div class="dp-dots"><span class="dp-dot" style="background:#2a3045"></span></div>
+  </div>
+  <div class="date-pill" onclick="selectDay(this,'ראשון, 15.03.2026','')">
+    <span class="dp-day">ראשון</span><span class="dp-num">15</span>
+    <div class="dp-dots"><span class="dp-dot" style="background:#2a3045"></span></div>
+  </div>
+  <div class="date-pill" onclick="selectDay(this,'שני, 16.03.2026','')">
+    <span class="dp-day">שני</span><span class="dp-num">16</span>
+    <div class="dp-dots"><span class="dp-dot" style="background:#2a3045"></span></div>
+  </div>
+  <div class="date-pill" onclick="selectDay(this,'שלישי, 17.03.2026','')">
+    <span class="dp-day">שלישי</span><span class="dp-num">17</span>
+    <div class="dp-dots"><span class="dp-dot" style="background:#2a3045"></span></div>
+  </div>
+  <div class="date-pill" onclick="selectDay(this,'רביעי, 18.03.2026','')">
+    <span class="dp-day">רביעי</span><span class="dp-num">18</span>
+    <div class="dp-dots"><span class="dp-dot" style="background:#2a3045"></span></div>
+  </div>
+  <div class="date-pill" onclick="selectDay(this,'חמישי, 19.03.2026','')">
+    <span class="dp-day">חמישי</span><span class="dp-num">19</span>
+    <div class="dp-dots"><span class="dp-dot" style="background:#2a3045"></span></div>
+  </div>
+  <div class="date-pill" onclick="selectDay(this,'שישי, 20.03.2026','')">
+    <span class="dp-day">שישי</span><span class="dp-num">20</span>
+    <div class="dp-dots"><span class="dp-dot" style="background:#2a3045"></span></div>
+  </div>
+</div>
+
+<!-- ══ CONTENT ══ -->
+<div id="content">
+
+  <!-- Task cards grid -->
+  <div id="task-grid">
+
+    <!-- Day header -->
+    <div class="day-row">
+      <span class="day-title" id="day-title">שבת, 07.03.2026</span>
+      <span class="day-sub" id="day-sub">היום</span>
+      <div class="day-chips">
+        <span class="dchip dchip-ok">1 מלא</span>
+        <span class="dchip dchip-p">2 חלקיים</span>
+        <span class="dchip dchip-b">1 חסום</span>
+      </div>
+    </div>
+
+    <div class="section-sep">משימות קבועות</div>
+
+    <!-- ── סיור 06–14 · partial+warn ── -->
+    <div class="task-card status-partial">
+      <div class="card-header">
+        <div class="card-header-top">
+          <span class="card-name">סיור 06:00–14:00</span>
+          <span class="card-badge cb-partial">חלקי · אזהרה</span>
+        </div>
+        <div class="card-time">06:00 – 14:00 · 8 שעות</div>
+        <div class="card-req">
+          <span class="req-chip">מ"כ ×1</span>
+          <span class="req-chip">לוחם ×2</span>
+          <span class="req-chip">נהג ×1</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="role-section">
+          <span class="role-label">מ"כ</span>
+          <div class="role-slots">
+            <div class="slot-filled slot-ok">
+              <div class="s-av av-b">דל</div>
+              <span class="s-name">דני לוי</span>
+              <span class="s-rm">✕</span>
+            </div>
+          </div>
+        </div>
+        <div class="role-section">
+          <span class="role-label">לוחם</span>
+          <div class="role-slots">
+            <div class="slot-filled slot-ok">
+              <div class="s-av av-g">אב</div>
+              <span class="s-name">אבי בן דוד</span>
+              <span class="s-rm">✕</span>
+            </div>
+            <div class="slot-filled slot-warn">
+              <div class="s-av av-p">גמ</div>
+              <span class="s-name">גל מזרחי</span>
+              <span class="s-flag" title="ישן 6.5 ש׳ — נדרש 8">⚠</span>
+              <span class="s-rm">✕</span>
+            </div>
+          </div>
+        </div>
+        <div class="role-section">
+          <span class="role-label">נהג</span>
+          <div class="role-slots">
+            <div class="slot-empty" onclick="toggleDropdown(this)">
+              <span class="slot-plus">+</span>
+              <div class="slot-input-wrap">
+                <input class="slot-input" placeholder="גרור חייל או הקלד שם...">
+                <div class="slot-dropdown">
+                  <div class="slot-dropdown-item"><div class="s-av av-y" style="width:20px;height:20px;font-size:9px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700">רנ</div><span class="sdi-name">רון נחמני</span><span class="sdi-status sdi-ok">זמין · נגן</span></div>
+                  <div class="slot-dropdown-item"><div class="s-av av-t" style="width:20px;height:20px;font-size:9px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700">רב</div><span class="sdi-name">רחל ברק</span><span class="sdi-status sdi-warn">שינה 7 ש׳ · נגן</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── סיור 14–22 · override ── -->
+    <div class="task-card status-override">
+      <div class="card-header">
+        <div class="card-header-top">
+          <span class="card-name">סיור 14:00–22:00</span>
+          <span class="card-badge cb-override">מלא · חריגה מאושרת</span>
+        </div>
+        <div class="card-time">14:00 – 22:00 · 8 שעות</div>
+        <div class="card-req">
+          <span class="req-chip">מ"כ ×1</span>
+          <span class="req-chip">לוחם ×2</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="role-section">
+          <span class="role-label">מ"כ</span>
+          <div class="role-slots">
+            <div class="slot-filled slot-override">
+              <div class="s-av av-p">סל</div>
+              <span class="s-name">סמ"ר לוי</span>
+              <span class="s-flag" title="חריגה מאושרת — שינה 5 ש׳">🔓</span>
+              <span class="s-rm">✕</span>
+            </div>
+          </div>
+        </div>
+        <div class="role-section">
+          <span class="role-label">לוחם</span>
+          <div class="role-slots">
+            <div class="slot-filled slot-ok"><div class="s-av av-y">מכ</div><span class="s-name">משה כהן</span><span class="s-rm">✕</span></div>
+            <div class="slot-filled slot-ok"><div class="s-av av-t">יל</div><span class="s-name">יוסי לוי</span><span class="s-rm">✕</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── כיתת כוננות · blocked ── -->
+    <div class="task-card status-blocked">
+      <div class="card-header">
+        <div class="card-header-top">
+          <span class="card-name">כיתת כוננות</span>
+          <span class="card-badge cb-blocked">חסום</span>
+        </div>
+        <div class="card-time">24 שעות · סבב</div>
+        <div class="card-req">
+          <span class="req-chip">מ"כ ×1</span>
+          <span class="req-chip">לוחם ×3</span>
+          <span class="req-chip">חובש ×1</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="role-section">
+          <span class="role-label">מ"כ</span>
+          <div class="role-slots">
+            <div class="slot-filled slot-ok"><div class="s-av av-b">דל</div><span class="s-name">דני לוי</span><span class="s-rm">✕</span></div>
+          </div>
+        </div>
+        <div class="role-section">
+          <span class="role-label">לוחם</span>
+          <div class="role-slots">
+            <div class="slot-filled slot-blocked">
+              <div class="s-av av-r">גמ</div>
+              <span class="s-name">גל מזרחי</span>
+              <span class="s-flag" title="חסום — גם בסיור 06–14">⛔</span>
+              <span class="s-rm">✕</span>
+            </div>
+            <div class="slot-filled slot-ok"><div class="s-av av-g">אב</div><span class="s-name">אבי בן דוד</span><span class="s-rm">✕</span></div>
+            <div class="slot-empty" onclick="toggleDropdown(this)">
+              <span class="slot-plus">+</span>
+              <div class="slot-input-wrap">
+                <input class="slot-input" placeholder="גרור חייל או הקלד שם...">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="role-section">
+          <span class="role-label">חובש</span>
+          <div class="role-slots">
+            <div class="slot-empty" onclick="toggleDropdown(this)">
+              <span class="slot-plus">+</span>
+              <div class="slot-input-wrap">
+                <input class="slot-input" placeholder="גרור חובש או הקלד שם...">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── מטבח · full ── -->
+    <div class="task-card status-full">
+      <div class="card-header">
+        <div class="card-header-top">
+          <span class="card-name">מטבח</span>
+          <span class="card-badge cb-full">מלא</span>
+        </div>
+        <div class="card-time">07:00 – 15:00</div>
+        <div class="card-req"><span class="req-chip">חייל ×2</span></div>
+      </div>
+      <div class="card-body">
+        <div class="role-section">
+          <span class="role-label">חייל</span>
+          <div class="role-slots">
+            <div class="slot-filled slot-ok"><div class="s-av av-y">מכ</div><span class="s-name">משה כהן</span><span class="s-rm">✕</span></div>
+            <div class="slot-filled slot-ok"><div class="s-av av-t">רב</div><span class="s-name">רחל ברק</span><span class="s-rm">✕</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-sep">משימות חד-פעמיות</div>
+
+    <div class="add-task-card">+ הוסף משימה חד-פעמית</div>
+
+  </div>
+
+  <!-- ══ SOLDIERS SIDEBAR ══ -->
+  <div id="soldiers-panel">
+    <div class="sp-header">
+      <div class="sp-title">
+        חיילים זמינים
+        <span class="sp-count">5 זמינים / 8 סה"כ</span>
+      </div>
+      <div class="sp-search">
+        <span class="sp-search-icon">🔍</span>
+        <input type="text" placeholder="חיפוש חייל...">
+      </div>
+    </div>
+    <div class="sp-filters">
+      <span class="sp-filter active">הכל</span>
+      <span class="sp-filter">זמינים</span>
+      <span class="sp-filter">מ"כ</span>
+      <span class="sp-filter">לוחם</span>
+      <span class="sp-filter">נהג</span>
+      <span class="sp-filter">חובש</span>
+    </div>
+    <div class="sp-list">
+
+      <!-- Available soldiers -->
+      <div class="sp-soldier" draggable="true">
+        <span class="drag-handle">⠿</span>
+        <div class="sp-av av-b">דל</div>
+        <div class="sp-info">
+          <div class="sp-name">דני לוי</div>
+          <div class="sp-role">מ"כ</div>
+          <div class="sp-caps"><span class="sp-cap cap-m16">M16</span></div>
+        </div>
+        <span class="sp-status sps-busy">מאויש</span>
+      </div>
+
+      <div class="sp-soldier" draggable="true">
+        <span class="drag-handle">⠿</span>
+        <div class="sp-av av-g">אב</div>
+        <div class="sp-info">
+          <div class="sp-name">אבי בן דוד</div>
+          <div class="sp-role">לוחם</div>
+          <div class="sp-caps"><span class="sp-cap cap-m16">M16</span><span class="sp-cap cap-hovesh">חובש</span></div>
+        </div>
+        <span class="sp-status sps-busy">מאויש</span>
+      </div>
+
+      <div class="sp-soldier" draggable="true">
+        <span class="drag-handle">⠿</span>
+        <div class="sp-av av-p">גמ</div>
+        <div class="sp-info">
+          <div class="sp-name">גל מזרחי</div>
+          <div class="sp-role">לוחם</div>
+          <div class="sp-caps"><span class="sp-cap cap-mag">MAG</span></div>
+        </div>
+        <span class="sp-status sps-warn">⚠ שינה 6.5 ש׳</span>
+      </div>
+
+      <div class="sp-soldier" draggable="true">
+        <span class="drag-handle">⠿</span>
+        <div class="sp-av av-y">רנ</div>
+        <div class="sp-info">
+          <div class="sp-name">רון נחמני</div>
+          <div class="sp-role">נהג · לוחם</div>
+          <div class="sp-caps"><span class="sp-cap cap-nagen">נגן</span><span class="sp-cap cap-m16">M16</span></div>
+        </div>
+        <span class="sp-status sps-ok">זמין</span>
+      </div>
+
+      <div class="sp-soldier" draggable="true">
+        <span class="drag-handle">⠿</span>
+        <div class="sp-av av-t">יל</div>
+        <div class="sp-info">
+          <div class="sp-name">יוסי לוי</div>
+          <div class="sp-role">לוחם</div>
+          <div class="sp-caps"><span class="sp-cap cap-m16">M16</span><span class="sp-cap cap-matol">מטול</span></div>
+        </div>
+        <span class="sp-status sps-busy">מאויש</span>
+      </div>
+
+      <div class="sp-soldier" draggable="true">
+        <span class="drag-handle">⠿</span>
+        <div class="sp-av av-y">מכ</div>
+        <div class="sp-info">
+          <div class="sp-name">משה כהן</div>
+          <div class="sp-role">לוחם</div>
+          <div class="sp-caps"><span class="sp-cap cap-mag">MAG</span><span class="sp-cap cap-negev">נגב</span></div>
+        </div>
+        <span class="sp-status sps-busy">מאויש</span>
+      </div>
+
+      <div class="sp-soldier" draggable="true">
+        <span class="drag-handle">⠿</span>
+        <div class="sp-av av-t">רב</div>
+        <div class="sp-info">
+          <div class="sp-name">רחל ברק</div>
+          <div class="sp-role">נהגת · לוחמת</div>
+          <div class="sp-caps"><span class="sp-cap cap-nagen">נגן</span><span class="sp-cap cap-hovesh">חובש</span></div>
+        </div>
+        <span class="sp-status sps-busy">מאויש</span>
+      </div>
+
+      <div class="sp-soldier" draggable="true">
+        <span class="drag-handle">⠿</span>
+        <div class="sp-av av-p">סל</div>
+        <div class="sp-info">
+          <div class="sp-name">סמ"ר לוי</div>
+          <div class="sp-role">מ"כ</div>
+          <div class="sp-caps"><span class="sp-cap cap-lau">LAU</span><span class="sp-cap cap-m16">M16</span></div>
+        </div>
+        <span class="sp-status sps-busy">מאויש</span>
+      </div>
+
+      <!-- Unavailable -->
+      <div class="sp-soldier unavailable" draggable="false">
+        <span class="drag-handle">⠿</span>
+        <div class="sp-av av-r">כר</div>
+        <div class="sp-info">
+          <div class="sp-name">כרמל ראובן</div>
+          <div class="sp-role">לוחם</div>
+          <div class="sp-caps"><span class="sp-cap cap-m16">M16</span></div>
+        </div>
+        <span class="sp-status sps-blocked">חופשה</span>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function selectDay(el, title, sub) {
+    document.querySelectorAll('.date-pill').forEach(p => p.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('day-title').textContent = title;
+    document.getElementById('day-sub').textContent = sub;
+  }
+
+  function toggleDropdown(slotEl) {
+    const input = slotEl.querySelector('.slot-input');
+    if (input) input.focus();
+  }
+
+  // Hide dropdowns when clicking outside
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.slot-empty')) {
+      document.querySelectorAll('.slot-dropdown').forEach(d => d.style.display = 'none');
+    }
+  });
+  document.querySelectorAll('.slot-empty').forEach(slot => {
+    slot.addEventListener('click', e => {
+      e.stopPropagation();
+      const dd = slot.querySelector('.slot-dropdown');
+      if (dd) dd.style.display = dd.style.display === 'none' ? '' : '';
+    });
+  });
+
+  // Drag-over highlight on empty slots
+  document.querySelectorAll('.slot-empty').forEach(slot => {
+    slot.addEventListener('dragover', e => { e.preventDefault(); slot.classList.add('drag-over'); });
+    slot.addEventListener('dragleave', () => slot.classList.remove('drag-over'));
+    slot.addEventListener('drop', e => { e.preventDefault(); slot.classList.remove('drag-over'); });
+  });
+</script>
+</body>
+</html>
