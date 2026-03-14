@@ -19,7 +19,7 @@
     "name": "Name",
     "phone": "Phone",
     "role": "Role",
-    "unit": "Unit",
+    "platoon": "Platoon",
     "status": "Status",
     "capabilities": "Capabilities",
     "invite": "Send invite",

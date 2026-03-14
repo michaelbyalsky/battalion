@@ -8,6 +8,10 @@ dist
 .next
 .turbo
 out
+**/.tsbuildinfo
+
+# Next.js generated
+apps/web/next-env.d.ts
 
 # Environment files
 .env
@@ -26,3 +30,7 @@ Thumbs.db
 .vscode
 .idea
 *.swp
+
+# Claude Code (local-only, not shared)
+.claude/settings.local.json
+.claude/worktrees/

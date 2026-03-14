@@ -115,7 +115,7 @@ packages/
 
 ```ts
 // apps/mobile/  AND  apps/web/ — same API
-import { useTranslation } from '@company/i18n'
+import { useTranslation } from '@battalion/i18n'
 
 const { t } = useTranslation()
 t('tasks.assignButton') // → "שבץ" / "Assign"

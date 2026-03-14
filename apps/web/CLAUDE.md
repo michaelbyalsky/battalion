@@ -70,7 +70,7 @@ Event type colors: guard `#ef4444` · formation `#22c55e` · training `#3b82f6` 
 
 ## i18n
 
-- Import from `@company/i18n`
+- Import from `@battalion/i18n`
 - In Server Components: use `getTranslation(locale)` (server-side)
 - In Client Components: use `useTranslation()` hook
 - Never hardcode Hebrew or English strings — all keys in `packages/i18n/locales/`

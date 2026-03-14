@@ -14,25 +14,47 @@ import {
 
 // ── Enums ─────────────────────────────────────────────────────────────────────
 
-export const roleEnum = pgEnum('role', ['soldier', 'shift_manager', 'commander'])
+export const roleEnum = pgEnum('role', [
+  'soldier',
+  'shift_manager',
+  'commander',
+  'battalion_commander',
+  'battalion_logistics',
+])
+export const companyTypeEnum = pgEnum('company_type', ['combat', 'support'])
 export const soldierStatusEnum = pgEnum('soldier_status_type', ['present', 'vacation', 'sick', 'out', 'return'])
 export const assignmentStatusEnum = pgEnum('assignment_status', ['assigned', 'confirmed', 'no_show', 'override'])
 export const inviteStatusEnum = pgEnum('invite_status', ['not_sent', 'sent', 'pending', 'active', 'expired'])
 export const eventTypeEnum = pgEnum('event_type', ['guard', 'formation', 'training', 'briefing', 'meal', 'patrol', 'sleep'])
 export const alertTypeEnum = pgEnum('alert_type', ['absence', 'no_show', 'conflict', 'system'])
 
+// ── Battalions ────────────────────────────────────────────────────────────────
+// גדוד — root tenant. Each battalion signs up and owns multiple companies (פלוגות).
+
+export const battalions = pgTable('battalions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: varchar('name', { length: 255 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
 // ── Companies ─────────────────────────────────────────────────────────────────
+// פלוגה — child of battalion.
+// type='combat'  → standard fighting company (פלוגת קו), scoped to own soldiers only.
+// type='support' → Support Company / פלסם (פלוגת סיוע מנהלתי), battalion-wide read access.
 
 export const companies = pgTable('companies', {
   id: uuid('id').primaryKey().defaultRandom(),
+  battalionId: uuid('battalion_id').notNull().references(() => battalions.id),
   name: varchar('name', { length: 255 }).notNull(),
+  type: companyTypeEnum('type').notNull().default('combat'),
   telegramBotToken: text('telegram_bot_token'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })
 
-// ── Units ─────────────────────────────────────────────────────────────────────
+// ── Platoons ──────────────────────────────────────────────────────────────────
+// מחלקה — hierarchical sub-groups within a company. parentId supports nested structure.
 
-export const units = pgTable('units', {
+export const platoons = pgTable('platoons', {
   id: uuid('id').primaryKey().defaultRandom(),
   companyId: uuid('company_id').notNull().references(() => companies.id),
   name: varchar('name', { length: 255 }).notNull(),
@@ -47,7 +69,7 @@ export const soldiers = pgTable('soldiers', {
   name: varchar('name', { length: 255 }).notNull(),
   phone: varchar('phone', { length: 20 }).notNull().unique(),
   role: roleEnum('role').notNull().default('soldier'),
-  unitId: uuid('unit_id').references(() => units.id),
+  platoonId: uuid('platoon_id').references(() => platoons.id),
   capabilities: text('capabilities').array().notNull().default([]),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })

@@ -20,10 +20,10 @@ importers:
 
   apps/api:
     dependencies:
-      '@company/db':
+      '@battalion/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@company/types':
+      '@battalion/types':
         specifier: workspace:*
         version: link:../../packages/types
       '@nestjs/common':
@@ -96,10 +96,10 @@ importers:
 
   apps/web:
     dependencies:
-      '@company/i18n':
+      '@battalion/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
-      '@company/types':
+      '@battalion/types':
         specifier: workspace:*
         version: link:../../packages/types
       i18next:

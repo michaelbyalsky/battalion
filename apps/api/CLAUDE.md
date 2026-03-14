@@ -66,7 +66,7 @@ Public routes (OTP endpoints only) use `@Public()` decorator to skip `JwtGuard`.
 - Use `class-validator` decorators (`@IsString()`, `@IsPhoneNumber()`, etc.)
 - `ValidationPipe` is global — applied in `main.ts`
 - Input DTOs live in `dto/` subfolder of the feature
-- Response types come from `@company/types`
+- Response types come from `@battalion/types`
 
 ## Multi-Tenancy Rules
 

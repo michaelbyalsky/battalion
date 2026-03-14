@@ -1,5 +1,10 @@
 // Roles
-export type Role = 'soldier' | 'shift_manager' | 'commander'
+export type Role = 'soldier' | 'shift_manager' | 'commander' | 'battalion_commander' | 'battalion_logistics'
+
+// Company type
+// 'combat'  — standard fighting company (פלוגת קו), scoped to its own soldiers
+// 'support' — Support Company / פלסם, battalion-wide read access
+export type CompanyType = 'combat' | 'support'
 
 // Soldier status
 export type SoldierStatus = 'present' | 'vacation' | 'sick' | 'out' | 'return'
@@ -18,23 +23,38 @@ export type AlertType = 'absence' | 'no_show' | 'conflict' | 'system'
 
 // ── DTOs ──────────────────────────────────────────────────────────────────────
 
+export interface Battalion {
+  id: string
+  name: string
+  createdAt: string
+}
+
+export interface Company {
+  id: string
+  battalionId: string
+  name: string
+  type: CompanyType
+  telegramBotToken: string | null
+  createdAt: string
+}
+
+export interface Platoon {
+  id: string
+  companyId: string
+  name: string
+  parentId: string | null
+}
+
 export interface Soldier {
   id: string
   companyId: string
   name: string
   phone: string
   role: Role
-  unitId: string | null
+  platoonId: string | null
   capabilities: string[]
   inviteStatus: InviteStatus
   createdAt: string
-}
-
-export interface Unit {
-  id: string
-  companyId: string
-  name: string
-  parentId: string | null
 }
 
 export interface Task {
@@ -100,7 +120,9 @@ export interface Alert {
 
 export interface JwtPayload {
   sub: string
-  company_id: string
+  battalion_id: string
+  company_id: string        // always present — soldier's own company
+  battalion_scope: boolean  // true for support company soldiers → battalion-wide read access
   role: Role
   exp: number
 }

@@ -15,10 +15,13 @@ export class TenantInterceptor implements NestInterceptor {
     // Skip public routes (no user attached yet)
     if (!request.user) return next.handle()
 
-    const companyId = request.user?.company_id
-    if (!companyId) throw new UnauthorizedException('Missing company context')
+    const battalionId = request.user?.battalion_id
+    if (!battalionId) throw new UnauthorizedException('Missing battalion context')
 
-    request.companyId = companyId
+    request.battalionId = battalionId
+    // Support company soldiers get battalion_scope=true → companyId is null so queries span
+    // the whole battalion. Combat soldiers are scoped to their own company.
+    request.companyId = request.user.battalion_scope ? null : request.user.company_id
     return next.handle()
   }
 }

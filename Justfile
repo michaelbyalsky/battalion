@@ -1,4 +1,4 @@
-set shell := ["bash", "-uc"]
+set shell := ["mise", "exec", "--", "bash", "-uc"]
 
 # Show available commands
 default:
@@ -31,6 +31,7 @@ generate-env:
   files=(
     "apps/api/.env:apps/api/.env.example"
     "apps/web/.env.local:apps/web/.env.example"
+    "packages/db/.env:packages/db/.env.example"
   )
   for pair in "${files[@]}"; do
     dest="${pair%%:*}"
@@ -51,6 +52,10 @@ generate-env-force:
 
 # ── Database ───────────────────────────────────────────────────────────────────
 
+# Generate Drizzle migration files from schema
+db-generate:
+  pnpm run db:generate
+
 # Run Drizzle migrations
 db-migrate:
   pnpm run db:migrate
@@ -62,6 +67,13 @@ db-seed:
 # Open Drizzle Studio (visual DB browser)
 db-studio:
   pnpm run db:studio
+
+# Generate + migrate + seed (full DB setup)
+db-setup:
+  just db-generate
+  just db-migrate
+  just db-seed
+  echo "✓ Database ready"
 
 # Re-run migrations + seed
 db-reset:
@@ -95,7 +107,7 @@ infra-logs:
 bootstrap:
   #!/usr/bin/env bash
   _check_wsl
-  echo "→ Installing tools via mise..."
+  echo "→ Installing tools via mise (node, pnpm, just)..."
   mise install
   echo "→ Installing pnpm dependencies..."
   pnpm install
@@ -103,10 +115,8 @@ bootstrap:
   just infra-up
   echo "→ Generating .env files..."
   just generate-env
-  echo "→ Running migrations..."
-  just db-migrate
-  echo "→ Seeding database..."
-  just db-seed
+  echo "→ Setting up database (generate + migrate + seed)..."
+  just db-setup
   echo ""
   echo "✅ All done. Run 'just dev' to start."
 

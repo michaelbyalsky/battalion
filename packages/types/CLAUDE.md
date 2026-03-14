@@ -15,16 +15,16 @@ Zero-runtime package. Pure TypeScript types and enums shared across `apps/api`, 
 Role, SoldierStatus, AssignmentStatus, InviteStatus, EventType, AlertType
 
 // Entity types (DB row shapes)
-Soldier, Unit, Task, CombatClockEvent, DailyAssignment, SoldierStatusRecord, Alert
+Battalion, Company, Platoon, Soldier, Task, CombatClockEvent, DailyAssignment, SoldierStatusRecord, Alert
 
 // Nested types
 RoleRequirement   — { role: Role, count: number, capabilities: string[] }
 
 // Auth
-JwtPayload        — { sub: string, company_id: string, role: Role, exp: number }
+JwtPayload        — { sub: string, battalion_id: string, company_id?: string, role: Role, exp: number }
 RequestOtpDto     — { phone: string }
 VerifyOtpDto      — { phone: string, code: string }
-RedeemInviteDto   — { inviteCode: string }
+RedeemInviteDto   — { code: string }
 ```
 
 ## What Does NOT Live Here
@@ -38,7 +38,7 @@ RedeemInviteDto   — { inviteCode: string }
 
 1. Add the type/interface to `src/index.ts`
 2. Export it from the same file (everything is re-exported from the barrel)
-3. Import in any app with `import { MyType } from '@company/types'`
+3. Import in any app with `import { MyType } from '@battalion/types'`
 
 ## Naming Convention
 

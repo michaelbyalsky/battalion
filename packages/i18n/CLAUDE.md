@@ -50,12 +50,12 @@ common.*            — shared UI (save, cancel, loading, error, etc.)
 
 ```typescript
 // Client Component
-import { useTranslation } from '@company/i18n'
+import { useTranslation } from '@battalion/i18n'
 const { t } = useTranslation()
 t('soldiers.addSoldier')
 
 // Server Component
-import { getTranslation } from '@company/i18n'
+import { getTranslation } from '@battalion/i18n'
 const { t } = await getTranslation(locale)
 t('soldiers.addSoldier')
 ```
@@ -63,7 +63,7 @@ t('soldiers.addSoldier')
 ## Usage in Mobile (React Native)
 
 ```typescript
-import { useTranslation } from '@company/i18n'
+import { useTranslation } from '@battalion/i18n'
 const { t } = useTranslation()
 t('soldiers.addSoldier')
 ```

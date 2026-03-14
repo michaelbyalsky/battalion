@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { db, soldiers } from '@company/db'
-import { eq } from 'drizzle-orm'
+import { db, soldiers, eq } from '@battalion/db'
 
 @Injectable()
 export class SoldiersService {

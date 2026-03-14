@@ -1,7 +1,6 @@
 import { Injectable, UnauthorizedException, NotFoundException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
-import { db, soldiers } from '@company/db'
-import { eq } from 'drizzle-orm'
+import { db, soldiers, companies, eq } from '@battalion/db'
 
 // OTP whitelist for dev/staging
 const DEV_PHONES = ['+972500000001', '+972500000002', '+972500000003']
@@ -31,7 +30,16 @@ export class AuthService {
     const isValid = DEV_PHONES.includes(phone) ? code === DEV_OTP : false // TODO: Redis OTP check
     if (!isValid) throw new UnauthorizedException('Invalid OTP')
 
-    const payload = { sub: soldier.id, company_id: soldier.companyId, role: soldier.role }
+    const [company] = await db.select().from(companies).where(eq(companies.id, soldier.companyId))
+    if (!company) throw new UnauthorizedException('Company not found')
+
+    const payload = {
+      sub: soldier.id,
+      battalion_id: company.battalionId,
+      company_id: soldier.companyId,
+      battalion_scope: company.type === 'support',  // support company → battalion-wide read
+      role: soldier.role,
+    }
     const accessToken = this.jwt.sign(payload)
     const refreshToken = this.jwt.sign(payload, { expiresIn: '30d' })
 

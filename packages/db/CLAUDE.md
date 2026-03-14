@@ -15,7 +15,7 @@ drizzle.config.ts — dialect: postgresql, migrations in ./migrations/
 ## Usage in Repositories
 
 ```typescript
-import { db, soldiers, eq, and } from '@company/db'
+import { db, soldiers, eq, and } from '@battalion/db'
 
 // Always filter by companyId — no exceptions
 db.select().from(soldiers).where(eq(soldiers.companyId, companyId))
@@ -23,16 +23,26 @@ db.select().from(soldiers).where(eq(soldiers.companyId, companyId))
 
 ## Multi-Tenancy Rule
 
-**Every table has `company_id`. Every query must filter by it.**
+**Every operational table has `company_id`. Every query must filter by it.**
 
-The repository layer is the only place that calls `db.*`. Services never import from `@company/db` directly.
+The repository layer is the only place that calls `db.*`. Services never import from `@battalion/db` directly.
+
+## Hierarchy
+
+```
+battalions (גדוד)   — root tenant, signs up and pays
+  └── companies (פלוגה) — child of battalion, has Telegram bot + soldiers
+        └── platoons (מחלקה) — sub-groups within a company
+              └── soldiers — belong to company + optional platoon
+```
 
 ## Tables
 
 | Table | Purpose |
 |-------|---------|
-| `companies` | Root tenant |
-| `units` | Hierarchical unit groups (parentId) |
+| `battalions` | Root tenant (גדוד) |
+| `companies` | פלוגה — child of battalion |
+| `platoons` | מחלקה — hierarchical groups within a company |
 | `soldiers` | User profile, role, capabilities |
 | `soldier_invites` | 6-char invite codes, status lifecycle |
 | `tasks` | Task templates (recurring + one-off) |
@@ -45,7 +55,7 @@ The repository layer is the only place that calls `db.*`. Services never import 
 ## Enums
 
 ```typescript
-role             — soldier | shift_manager | commander
+role             — soldier | shift_manager | commander | battalion_commander | battalion_logistics
 soldier_status   — present | vacation | sick | out | return
 assignment_status — assigned | confirmed | no_show | override
 invite_status    — not_sent | sent | pending | active | expired
@@ -55,9 +65,9 @@ alert_type       — absence | no_show | conflict | system
 
 ## Adding a New Table
 
-1. Define the table in `schema.ts` — include `companyId` (FK → companies) on every table
-2. Export it from `index.ts`
-3. Run `mise run db:migrate` to generate and apply migration
+1. Define the table in `schema.ts` — include `companyId` (FK → companies) on every operational table
+2. Export it from `index.ts` (auto-exported via `export * from './schema'`)
+3. Run `just db-generate` to generate migration, then `just db-migrate` to apply
 4. Add to seed if needed
 
 ## Schema Conventions
@@ -71,10 +81,15 @@ alert_type       — absence | no_show | conflict | system
 ## Migrations
 
 ```bash
-just db-migrate   # run pending migrations  (pnpm --filter=packages/db migrate)
+just db-generate  # generate migration files from schema changes
+just db-migrate   # apply pending migrations to the DB
+just db-seed      # seed with dev data (1 company, 1 unit, 3 soldiers)
+just db-setup     # generate + migrate + seed (first-time setup)
+just db-reset     # migrate + seed (re-seed existing DB)
 just db-studio    # open Drizzle Studio, port 4983
-just db-reset     # re-migrate + re-seed (dev only)
 ```
+
+**Always run `just db-generate` after changing `schema.ts`**, then commit the generated migration file.
 
 DB commands bypass turbo — they use `pnpm --filter=packages/db` directly since they target a single package.
 
@@ -83,6 +98,7 @@ Never edit migration files manually after they have been applied.
 ## Seed
 
 Test data created by `seed.ts`:
-- 1 company
-- 1 unit
+- 1 battalion (גדוד 8200)
+- 1 company/פלוגה (פלוגת פיתוח)
+- 1 platoon/מחלקה (מחלקה א)
 - 3 soldiers on phones `+972500000001–003` (OTP `123456`)

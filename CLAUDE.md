@@ -39,9 +39,9 @@ Mockups live in `mockup/` (serve with `python3 mockup/dev.py`, port 3131).
 
 ### Multi-Tenancy
 - Every row tagged with `company_id`
-- Tenant isolation enforced via a NestJS `TenantInterceptor` (reads `company_id` from JWT, injects into every request)
+- Tenant isolation enforced via a NestJS `TenantInterceptor` (reads `battalion_id` and `company_id` from JWT, injects into every request)
 - Every Drizzle query **must** filter by `companyId` — never query without it
-- JWT contains `company_id` and `role` claims
+- JWT contains `battalion_id`, `company_id` (optional for battalion-level users), and `role` claims
 
 ### Auth
 - Phone-only OTP via Twilio — no passwords ever
@@ -87,12 +87,22 @@ Mockups live in `mockup/` (serve with `python3 mockup/dev.py`, port 3131).
 
 ## Data Model
 
+### Hierarchy
+
+```
+battalions (גדוד)   — root tenant, signs up and pays
+  └── companies (פלוגה) — child of battalion, has Telegram bot + soldiers
+        └── platoons (מחלקה) — sub-groups within a company
+              └── soldiers — belong to company + optional platoon
+```
+
 ### Core entities
 
 ```
-companies          — multi-tenant root
-soldiers           — user profile + role + unit + capabilities
-units              — מחלקה/מפלגה hierarchy within a company
+battalions         — root tenant (גדוד)
+companies          — פלוגה, child of battalion (battalion_id FK)
+platoons           — מחלקה, hierarchical groups within a company (company_id FK)
+soldiers           — user profile + role + platoon + capabilities (company_id FK)
 ```
 
 ### Schedule & Assignment
@@ -240,7 +250,7 @@ export class SoldiersController {
 ### i18n
 - Default language: Hebrew (RTL)
 - All strings live in `packages/i18n/locales/he.json` and `en.json`
-- Use `useTranslation` from `@company/i18n` — never hardcode strings
+- Use `useTranslation` from `@battalion/i18n` — never hardcode strings
 - React Native: `I18nManager.forceRTL(locale === 'he')`
 - Next.js: `<html dir={locale === 'he' ? 'rtl' : 'ltr'}>` + Tailwind `rtl:` variants
 - Dates: always use `Intl.DateTimeFormat` with locale

@@ -19,7 +19,7 @@
     "name": "שם",
     "phone": "טלפון",
     "role": "תפקיד",
-    "unit": "יחידה",
+    "platoon": "מחלקה",
     "status": "סטטוס",
     "capabilities": "יכולות",
     "invite": "שלח הזמנה",
