@@ -10,7 +10,7 @@ The user is actively working on improving their English. **Before responding to 
 
 A military/unit management system for soldier registration, task assignment, duty squads, and alerts. Multi-tenant, multi-language (Hebrew + English). Target market: Israeli army/defense industry — deployed on AWS il-central-1 (Tel Aviv) for data residency compliance.
 
-**Status:** Mockup phase complete — moving to implementation.
+**Status:** Implementation underway. Mockup phase complete.
 Mockups live in `mockup/` (serve with `python3 mockup/dev.py`, port 3131).
 
 ---
@@ -18,8 +18,8 @@ Mockups live in `mockup/` (serve with `python3 mockup/dev.py`, port 3131).
 ## Tech Stack
 
 ### Monorepo
-- **Turborepo** with TypeScript throughout
-- `apps/mobile` — React Native + Expo
+- **Turborepo** with TypeScript throughout — package manager is **pnpm** (not npm)
+- `apps/mobile` — React Native + Expo _(not yet scaffolded)_
 - `apps/web` — Next.js 15 (App Router), commander interface
 - `apps/api` — NestJS backend (self-hosted, replaces Supabase)
 - `packages/i18n` — shared i18next translations (he.json, en.json)
@@ -146,6 +146,95 @@ Overlapping events with **different** soldiers (e.g. patrol team + base soldiers
 
 ---
 
+## 3-Layer Architecture (API)
+
+Every NestJS feature module follows a strict 3-layer structure. Never skip or merge layers.
+
+```
+Controller  →  Service  →  Repository
+    ↓              ↓             ↓
+HTTP/WS       Business       Drizzle
+concerns       logic          queries
+```
+
+### Layer 1 — Controller (`*.controller.ts`)
+- Handles HTTP routing, request parsing, response shaping
+- Applies guards (`@UseGuards`), roles (`@Roles`), decorators
+- Calls service methods — **no business logic here**
+- Calls service methods — **no Drizzle queries here**
+- Validates input via class-validator DTOs (`@Body()`, `@Param()`)
+
+### Layer 2 — Service (`*.service.ts`)
+- Contains all business logic and domain rules
+- Calls repository methods — **no `db.*` queries directly**
+- Calls repository methods — **no HTTP concerns (no `req`, `res`)**
+- Orchestrates multiple repositories when needed
+- Throws domain exceptions (`NotFoundException`, `ConflictException`, etc.)
+
+### Layer 3 — Repository (`*.repository.ts`)
+- Contains all Drizzle queries — the **only** place `db.*` is called
+- Every method receives `companyId` as first argument — no exceptions
+- No business logic, no HTTP concerns
+- Returns raw DB rows or mapped types
+
+### Module file layout
+```
+soldiers/
+  soldiers.module.ts
+  soldiers.controller.ts
+  soldiers.service.ts
+  soldiers.repository.ts
+  dto/
+    create-soldier.dto.ts
+    update-soldier.dto.ts
+```
+
+### Example
+```typescript
+// Repository — only Drizzle, always companyId first
+@Injectable()
+export class SoldiersRepository {
+  list(companyId: string) {
+    return db.select().from(soldiers).where(eq(soldiers.companyId, companyId))
+  }
+  findById(companyId: string, id: string) {
+    return db.select().from(soldiers)
+      .where(and(eq(soldiers.companyId, companyId), eq(soldiers.id, id)))
+      .then(rows => rows[0] ?? null)
+  }
+}
+
+// Service — business logic, calls repository
+@Injectable()
+export class SoldiersService {
+  constructor(private readonly repo: SoldiersRepository) {}
+
+  async list(companyId: string) {
+    return this.repo.list(companyId)
+  }
+  async findOrThrow(companyId: string, id: string) {
+    const soldier = await this.repo.findById(companyId, id)
+    if (!soldier) throw new NotFoundException('Soldier not found')
+    return soldier
+  }
+}
+
+// Controller — HTTP only, calls service
+@UseGuards(JwtGuard, RolesGuard)
+@Controller('soldiers')
+export class SoldiersController {
+  constructor(private readonly service: SoldiersService) {}
+
+  @Get()
+  @Roles('commander', 'shift_manager')
+  list(@Req() req: RequestWithUser) {
+    return this.service.list(req.companyId)
+  }
+}
+```
+
+---
+
 ## Key Conventions
 
 ### i18n
@@ -211,12 +300,34 @@ Status colors: green `#22c55e` · amber `#f59e0b` · red `#ef4444` · purple `#a
 
 ---
 
+## Task Runner Hierarchy
+
+Three tools work together — each at a different level:
+
+| Tool | Role |
+|------|------|
+| **just** | Developer-facing entry point. Thin wrapper around pnpm scripts. |
+| **pnpm** | Package manager + workspace filter. Delegates to turbo or runs single-package scripts. |
+| **turbo** | Monorepo task orchestrator. Runs multi-app tasks in parallel with caching and dependency ordering. |
+
+```
+just dev
+  └─► pnpm run dev
+        └─► turbo dev            ← runs apps/api + apps/web in parallel
+
+just db-migrate
+  └─► pnpm run db:migrate
+        └─► pnpm --filter=packages/db migrate   ← single package, no turbo needed
+```
+
+Always use `just` as the entry point. Never call `turbo` or `pnpm run` directly.
+
 ## Build & Deploy
 
 - Mobile: `eas build --platform all` (EAS Build, no local Mac needed)
 - Web: Next.js deployed to AWS (ECS or Amplify)
 - API: Docker → ECS on il-central-1
-- Local dev: `npm run dev` (web + api); Expo Go for mobile
+- Local dev: `just dev` (web + api); Expo Go for mobile
 - Mockups: `python3 mockup/dev.py` → http://localhost:3131
 
 ## Testing

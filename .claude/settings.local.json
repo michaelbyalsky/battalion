@@ -16,7 +16,8 @@
       "mcp__notion__notion-fetch",
       "mcp__notion__notion-update-page",
       "WebSearch",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(mise trust ~/code/company/mise.toml)"
     ]
   }
 }
