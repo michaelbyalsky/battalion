@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@theme {
+  /* Fonts */
+  --font-sans: var(--font-heebo), system-ui, sans-serif;
+
+  /* Background */
+  --color-bg-base: #0f1117;
+  --color-bg-surface: #151820;
+  --color-bg-raised: #1e2333;
+
+  /* Borders */
+  --color-border: #1e2333;
+  --color-border-strong: #2a3045;
+
+  /* Text */
+  --color-text-primary: #e0e0e0;
+  --color-text-muted: #7a8ab0;
+  --color-text-dim: #4a5270;
+
+  /* Accent */
+  --color-accent: #3b82f6;
+
+  /* Status */
+  --color-status-green: #22c55e;
+  --color-status-amber: #f59e0b;
+  --color-status-red: #ef4444;
+  --color-status-purple: #a855f7;
+
+  /* Event types */
+  --color-event-guard: #ef4444;
+  --color-event-formation: #22c55e;
+  --color-event-training: #3b82f6;
+  --color-event-briefing: #a855f7;
+  --color-event-meal: #14b8a6;
+  --color-event-patrol: #f59e0b;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
+}
+
+/* Fix time/number display in RTL containers */
+.ltr-content {
+  direction: ltr;
+  unicode-bidi: isolate;
+}

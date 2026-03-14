@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "dashboard": "לוח בקרה",
+    "status": "מצב כוח אדם",
+    "schedule": "שיבוץ יומי",
+    "combatClock": "שעון לחימה",
+    "soldiers": "ניהול חיילים",
+    "tasks": "הגדרת משימות"
+  },
+  "auth": {
+    "phone": "מספר טלפון",
+    "enterOtp": "הכנס קוד אימות",
+    "sendOtp": "שלח קוד",
+    "verify": "אמת",
+    "logout": "התנתק",
+    "inviteCode": "קוד הזמנה"
+  },
+  "soldiers": {
+    "name": "שם",
+    "phone": "טלפון",
+    "role": "תפקיד",
+    "unit": "יחידה",
+    "status": "סטטוס",
+    "capabilities": "יכולות",
+    "invite": "שלח הזמנה",
+    "resend": "שלח מחדש",
+    "inviteStatus": {
+      "not_sent": "טרם נשלח",
+      "sent": "נשלח",
+      "pending": "ממתין",
+      "active": "פעיל",
+      "expired": "פג תוקף"
+    }
+  },
+  "status": {
+    "present": "נוכח",
+    "vacation": "חופשה",
+    "sick": "מחלה",
+    "out": "חוץ",
+    "return": "חזרה"
+  },
+  "eventTypes": {
+    "guard": "כוננות",
+    "formation": "מסדר",
+    "training": "אימון",
+    "briefing": "תדריך",
+    "meal": "ארוחה",
+    "patrol": "סיור",
+    "sleep": "שינה"
+  },
+  "common": {
+    "save": "שמור",
+    "cancel": "ביטול",
+    "delete": "מחק",
+    "edit": "ערוך",
+    "add": "הוסף",
+    "search": "חיפוש",
+    "loading": "טוען...",
+    "error": "שגיאה",
+    "success": "הצלחה",
+    "confirm": "אישור",
+    "back": "חזור",
+    "noData": "אין נתונים"
+  }
+}

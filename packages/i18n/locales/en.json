@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "status": "Personnel Status",
+    "schedule": "Daily Schedule",
+    "combatClock": "Combat Clock",
+    "soldiers": "Soldiers",
+    "tasks": "Tasks"
+  },
+  "auth": {
+    "phone": "Phone number",
+    "enterOtp": "Enter OTP code",
+    "sendOtp": "Send code",
+    "verify": "Verify",
+    "logout": "Logout",
+    "inviteCode": "Invite code"
+  },
+  "soldiers": {
+    "name": "Name",
+    "phone": "Phone",
+    "role": "Role",
+    "unit": "Unit",
+    "status": "Status",
+    "capabilities": "Capabilities",
+    "invite": "Send invite",
+    "resend": "Resend",
+    "inviteStatus": {
+      "not_sent": "Not sent",
+      "sent": "Sent",
+      "pending": "Pending",
+      "active": "Active",
+      "expired": "Expired"
+    }
+  },
+  "status": {
+    "present": "Present",
+    "vacation": "Vacation",
+    "sick": "Sick",
+    "out": "Out",
+    "return": "Return"
+  },
+  "eventTypes": {
+    "guard": "Guard",
+    "formation": "Formation",
+    "training": "Training",
+    "briefing": "Briefing",
+    "meal": "Meal",
+    "patrol": "Patrol",
+    "sleep": "Sleep"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "back": "Back",
+    "noData": "No data"
+  }
+}

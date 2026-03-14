@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>שעון לחימה</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Heebo', sans-serif; background: #0f1117; color: #e0e0e0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; font-size: 14px; }
+
+    /* ── Topbar ── */
+    #topbar { background: #151820; border-bottom: 1px solid #1e2333; display: flex; align-items: center; gap: 12px; padding: 0 20px; height: 50px; flex-shrink: 0; }
+    .topbar-title { font-size: 15px; font-weight: 700; color: #fff; }
+    .tsep { width: 1px; height: 22px; background: #1e2333; }
+    .tspacer { flex: 1; }
+    .view-toggle { display: flex; background: #0f1117; border: 1px solid #1e2333; border-radius: 6px; overflow: hidden; }
+    .view-btn { padding: 5px 16px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; background: transparent; color: #7a8ab0; font-family: inherit; transition: background 0.1s, color 0.1s; }
+    .view-btn.active { background: #1e2d4a; color: #3b82f6; }
+    .week-nav { display: flex; align-items: center; gap: 6px; }
+    .week-nav button { background: #1e2333; border: 1px solid #2a3045; border-radius: 5px; color: #b0b8c8; font-family: inherit; font-size: 12px; padding: 3px 9px; cursor: pointer; }
+    .week-nav button:hover { background: #2a3045; }
+    .week-label { font-size: 12px; color: #7a8ab0; min-width: 120px; text-align: center; }
+    .add-btn { background: #0a1f3a; border: 1px solid #1d4ed8; border-radius: 6px; color: #93c5fd; font-family: inherit; font-size: 12px; font-weight: 600; padding: 5px 14px; cursor: pointer; }
+    .add-btn:hover { background: #1d4ed8; color: #fff; }
+
+    /* ── Category filters ── */
+    #filters { background: #151820; border-bottom: 1px solid #1e2333; display: flex; align-items: center; gap: 5px; padding: 7px 20px; flex-shrink: 0; overflow-x: auto; }
+    #filters::-webkit-scrollbar { height: 0; }
+    .cat-chip { font-size: 11px; font-weight: 600; border-radius: 4px; padding: 3px 10px; cursor: pointer; border: 1px solid transparent; white-space: nowrap; user-select: none; }
+    .cat-chip.all.on { background: #1e2d4a; color: #3b82f6; border-color: #1d4ed8; }
+    .cat-chip.all.off { background: #1e2333; color: #4a5270; border-color: #2a3045; }
+    .cat-chip.guard.on   { background: #2d0a0a; color: #fca5a5; border-color: #7f1d1d; }
+    .cat-chip.guard.off  { background: #1a0a0a; color: #4a1a1a; border-color: #2a1010; }
+    .cat-chip.formation.on  { background: #0a1f10; color: #4ade80; border-color: #14532d; }
+    .cat-chip.formation.off { background: #0a100a; color: #1a3a1a; border-color: #102010; }
+    .cat-chip.training.on  { background: #0a1428; color: #93c5fd; border-color: #1e3a5f; }
+    .cat-chip.training.off { background: #0a0e18; color: #1a2a3a; border-color: #101828; }
+    .cat-chip.briefing.on  { background: #160a2e; color: #c4b5fd; border-color: #3b0764; }
+    .cat-chip.briefing.off { background: #100a18; color: #2a1a3a; border-color: #180a28; }
+    .cat-chip.meal.on  { background: #021a18; color: #5eead4; border-color: #042f2e; }
+    .cat-chip.meal.off { background: #020e0e; color: #0a2020; border-color: #041414; }
+    .cat-chip.patrol.on  { background: #1f1200; color: #fbbf24; border-color: #78350f; }
+    .cat-chip.patrol.off { background: #100a00; color: #302010; border-color: #201000; }
+    .cat-sep { color: #2a3045; }
+
+    /* ── Date strip (daily view) ── */
+    #date-strip { background: #151820; border-bottom: 2px solid #1e2333; display: flex; align-items: stretch; padding: 0 20px; overflow-x: auto; flex-shrink: 0; height: 66px; display: none; }
+    #date-strip::-webkit-scrollbar { height: 3px; }
+    #date-strip::-webkit-scrollbar-thumb { background: #2a3045; border-radius: 2px; }
+    .date-pill { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 62px; padding: 6px 8px; cursor: pointer; border-bottom: 3px solid transparent; transition: background 0.1s; }
+    .date-pill:hover { background: #1e2333; }
+    .date-pill.selected { border-bottom-color: #3b82f6; background: #1a1d2e; }
+    .dp-day { font-size: 10px; font-weight: 600; color: #4a5270; }
+    .dp-num { font-size: 20px; font-weight: 700; line-height: 1; color: #e0e0e0; }
+    .date-pill.today .dp-num { color: #3b82f6; }
+
+    /* ── Calendar wrap ── */
+    #cal-wrap { flex: 1; display: flex; overflow: hidden; }
+
+    /* ── Day headers bar (fixed) ── */
+    #day-headers { background: #151820; border-bottom: 1px solid #1e2333; flex-shrink: 0; display: flex; direction: ltr; }
+    .dh-gutter { width: 52px; min-width: 52px; flex-shrink: 0; }
+    .dh-day { flex: 1; min-width: 110px; text-align: center; padding: 6px 0; border-right: 1px solid #1e2333; }
+    .dh-day:last-child { border-right: none; }
+    .dh-name { font-size: 11px; font-weight: 600; color: #7a8ab0; display: block; direction: rtl; }
+    .dh-date { font-size: 14px; font-weight: 700; color: #e0e0e0; display: block; direction: rtl; }
+    .dh-day.today .dh-date { color: #3b82f6; }
+    .dh-day.today { background: #0f1520; }
+
+    /* ── Weekly calendar body ── */
+    #week-view { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    #week-body { flex: 1; display: flex; overflow: hidden; }
+    #week-scroll { flex: 1; overflow-y: auto; overflow-x: auto; }
+    #week-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    #week-scroll::-webkit-scrollbar-thumb { background: #2a3045; border-radius: 3px; }
+    #week-inner { display: flex; direction: ltr; }
+
+    /* Time gutter */
+    .time-gutter { width: 52px; min-width: 52px; flex-shrink: 0; }
+    .time-tick { height: 48px; display: flex; align-items: flex-start; justify-content: flex-end; padding: 0 6px 0 0; font-size: 10px; color: #4a5270; font-weight: 500; line-height: 1; padding-top: 1px; }
+
+    /* Day columns */
+    #week-grid { display: flex; flex: 1; }
+    .day-col { flex: 1; min-width: 110px; border-right: 1px solid #1e2333; position: relative; }
+    .day-col:last-child { border-right: none; }
+    .day-col.today { background: #0c0f18; }
+    .day-col-body { position: relative; }
+    .hour-line { position: absolute; left: 0; right: 0; border-top: 1px solid #1e2333; pointer-events: none; }
+    .hour-line.half-hour { border-top-color: #141720; border-top-style: dashed; }
+
+    /* Event blocks */
+    .ev { position: absolute; left: 3px; right: 3px; border-radius: 5px; border-right: 3px solid; padding: 3px 6px 3px 4px; overflow: hidden; cursor: pointer; transition: filter 0.1s, z-index 0s; z-index: 2; direction: rtl; }
+    .ev:hover { filter: brightness(1.2); z-index: 20; }
+    .ev-name { font-size: 10px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; direction: rtl; }
+    /* direction:ltr fixes bidi reversal of "05:30–06:30" in an RTL container */
+    .ev-time { font-size: 9px; opacity: 0.75; white-space: nowrap; line-height: 1.3; direction: ltr; text-align: right; unicode-bidi: isolate; }
+    .ev.guard     { background: #2d0a0a; border-color: #ef4444; color: #fca5a5; }
+    .ev.formation { background: #0a1f10; border-color: #22c55e; color: #4ade80; }
+    .ev.training  { background: #0a1428; border-color: #3b82f6; color: #93c5fd; }
+    .ev.briefing  { background: #160a2e; border-color: #a855f7; color: #c4b5fd; }
+    .ev.meal      { background: #021a18; border-color: #14b8a6; color: #5eead4; }
+    .ev.patrol    { background: #1f1200; border-color: #f59e0b; color: #fbbf24; }
+
+    /* Now indicator */
+    .now-line { position: absolute; left: 0; right: 0; z-index: 15; pointer-events: none; }
+    .now-line::before { content: ''; position: absolute; left: 0; right: 0; top: 0; border-top: 2px solid #ef4444; }
+    .now-dot { position: absolute; right: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: #ef4444; }
+
+    /* Attendance chip on event block */
+    .ev-att { font-size: 8px; font-weight: 700; border-radius: 3px; padding: 1px 4px; margin-top: 2px; display: inline-block; line-height: 1.4; }
+    .att-full { background: rgba(34,197,94,0.18); color: #4ade80; }
+    .att-part { background: rgba(245,158,11,0.18); color: #fbbf24; }
+    .att-conf { background: rgba(239,68,68,0.25); color: #fca5a5; }
+    /* Conflict badge (absolute, top-left corner of event) */
+    .ev-conf { position: absolute; top: 3px; left: 4px; font-size: 9px; line-height: 1; z-index: 3; }
+
+    /* ── Daily view ── */
+    #daily-view { flex: 1; display: none; overflow: hidden; }
+    #daily-scroll { flex: 1; overflow-y: auto; }
+    #daily-scroll::-webkit-scrollbar { width: 6px; }
+    #daily-scroll::-webkit-scrollbar-thumb { background: #2a3045; border-radius: 3px; }
+    #daily-inner { display: flex; direction: ltr; }
+    .daily-gutter { width: 52px; min-width: 52px; flex-shrink: 0; }
+    .daily-col-body { flex: 1; position: relative; }
+    .daily-col-body .ev { left: 6px; right: 6px; border-radius: 7px; padding: 6px 10px 6px 8px; }
+    .daily-col-body .ev-name { font-size: 12px; }
+    .daily-col-body .ev-time { font-size: 10px; }
+
+    /* ── Detail panel ── */
+    #detail-panel { width: 260px; min-width: 260px; background: #151820; border-right: 1px solid #1e2333; display: none; flex-direction: column; direction: rtl; }
+    #detail-panel.open { display: flex; }
+    .dpp-header { padding: 14px 14px 12px; border-bottom: 1px solid #1e2333; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .dpp-name { font-size: 14px; font-weight: 700; color: #fff; flex: 1; }
+    .dpp-close { cursor: pointer; color: #4a5270; font-size: 16px; line-height: 1; flex-shrink: 0; padding: 2px; }
+    .dpp-close:hover { color: #e0e0e0; }
+    .dpp-type { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; border-radius: 4px; padding: 3px 8px; margin-top: 6px; }
+    .dpp-body { padding: 14px; display: flex; flex-direction: column; gap: 14px; flex: 1; overflow-y: auto; }
+    .dpp-row { display: flex; flex-direction: column; gap: 4px; }
+    .dpp-label { font-size: 10px; font-weight: 700; color: #4a5270; text-transform: uppercase; letter-spacing: 0.05em; }
+    .dpp-value { font-size: 13px; color: #e0e0e0; }
+    .dpp-days { display: flex; gap: 4px; flex-wrap: wrap; }
+    .dpp-day-pill { font-size: 11px; background: #1e2333; border: 1px solid #2a3045; border-radius: 4px; padding: 2px 7px; color: #7a8ab0; }
+    .dpp-day-pill.active { background: #1e2d4a; border-color: #2563eb; color: #93c5fd; }
+    .dpp-actions { padding: 12px 14px; border-top: 1px solid #1e2333; display: flex; gap: 8px; }
+    .dpp-btn { flex: 1; padding: 8px; border-radius: 6px; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid; }
+    .dpp-btn-edit { background: #0a1f3a; border-color: #1d4ed8; color: #93c5fd; }
+    .dpp-btn-del  { background: #2d0a0a; border-color: #7f1d1d; color: #fca5a5; }
+
+    /* ── Add event modal ── */
+    #modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; display: none; align-items: center; justify-content: center; }
+    #modal-overlay.open { display: flex; }
+    .modal { background: #151820; border: 1px solid #1e2333; border-radius: 12px; width: 420px; direction: rtl; overflow: hidden; }
+    .modal-header { padding: 16px 18px; border-bottom: 1px solid #1e2333; display: flex; align-items: center; justify-content: space-between; }
+    .modal-title { font-size: 15px; font-weight: 700; color: #fff; }
+    .modal-close { cursor: pointer; color: #4a5270; font-size: 18px; }
+    .modal-close:hover { color: #e0e0e0; }
+    .modal-body { padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+    .form-row { display: flex; flex-direction: column; gap: 5px; }
+    .form-label { font-size: 11px; font-weight: 700; color: #7a8ab0; }
+    .form-input { background: #0f1117; border: 1px solid #2a3045; border-radius: 7px; padding: 8px 12px; color: #e0e0e0; font-family: inherit; font-size: 13px; outline: none; }
+    .form-input:focus { border-color: #3b82f6; }
+    .form-row-2 { display: flex; gap: 10px; }
+    .form-row-2 .form-row { flex: 1; }
+    .type-grid { display: flex; gap: 6px; flex-wrap: wrap; }
+    .type-opt { font-size: 11px; font-weight: 600; border-radius: 5px; padding: 4px 10px; cursor: pointer; border: 1px solid transparent; }
+    .days-grid { display: flex; gap: 5px; }
+    .day-opt { flex: 1; text-align: center; font-size: 11px; font-weight: 600; border-radius: 5px; padding: 4px 0; cursor: pointer; background: #1e2333; border: 1px solid #2a3045; color: #7a8ab0; }
+    .day-opt.selected { background: #1e2d4a; border-color: #2563eb; color: #93c5fd; }
+    .modal-footer { padding: 14px 18px; border-top: 1px solid #1e2333; display: flex; gap: 10px; justify-content: flex-end; }
+    .btn-save { background: #1d4ed8; border: 1px solid #2563eb; border-radius: 7px; color: #fff; font-family: inherit; font-size: 13px; font-weight: 600; padding: 8px 20px; cursor: pointer; }
+    .btn-cancel { background: #1e2333; border: 1px solid #2a3045; border-radius: 7px; color: #7a8ab0; font-family: inherit; font-size: 13px; font-weight: 600; padding: 8px 20px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<!-- ══ TOPBAR ══ -->
+<div id="topbar">
+  <span class="topbar-title">שעון לחימה</span>
+  <div class="tsep"></div>
+  <div class="view-toggle">
+    <button class="view-btn active" id="btn-weekly" onclick="setView('weekly')">שבועי</button>
+    <button class="view-btn" id="btn-daily" onclick="setView('daily')">יומי</button>
+  </div>
+  <div class="tsep"></div>
+  <div class="week-nav">
+    <button onclick="shiftWeek(-1)">&#8594;</button>
+    <span class="week-label" id="week-label">שבוע 10 · מרץ 2026</span>
+    <button onclick="shiftWeek(1)">&#8592;</button>
+  </div>
+  <div class="tspacer"></div>
+  <button class="add-btn" onclick="openModal()">+ הוסף ארוע</button>
+</div>
+
+<!-- ══ FILTERS ══ -->
+<div id="filters">
+  <span class="cat-chip all on"       data-type="all"       onclick="toggleFilter(this)">הכל</span>
+  <span class="cat-sep">·</span>
+  <span class="cat-chip guard on"     data-type="guard"     onclick="toggleFilter(this)">⬤ כוננות</span>
+  <span class="cat-chip formation on" data-type="formation" onclick="toggleFilter(this)">⬤ מסדר</span>
+  <span class="cat-chip training on"  data-type="training"  onclick="toggleFilter(this)">⬤ אימון</span>
+  <span class="cat-chip briefing on"  data-type="briefing"  onclick="toggleFilter(this)">⬤ תדריך</span>
+  <span class="cat-chip meal on"      data-type="meal"      onclick="toggleFilter(this)">⬤ ארוחה</span>
+  <span class="cat-chip patrol on"    data-type="patrol"    onclick="toggleFilter(this)">⬤ סיור</span>
+</div>
+
+<!-- ══ DATE STRIP (daily only) ══ -->
+<div id="date-strip">
+  <div class="date-pill" onclick="selectDay(0,this)"><span class="dp-day">ראשון</span><span class="dp-num">08</span></div>
+  <div class="date-pill" onclick="selectDay(1,this)"><span class="dp-day">שני</span><span class="dp-num">09</span></div>
+  <div class="date-pill" onclick="selectDay(2,this)"><span class="dp-day">שלישי</span><span class="dp-num">10</span></div>
+  <div class="date-pill" onclick="selectDay(3,this)"><span class="dp-day">רביעי</span><span class="dp-num">11</span></div>
+  <div class="date-pill" onclick="selectDay(4,this)"><span class="dp-day">חמישי</span><span class="dp-num">12</span></div>
+  <div class="date-pill today selected" onclick="selectDay(5,this)"><span class="dp-day">שישי</span><span class="dp-num">13</span></div>
+  <div class="date-pill" onclick="selectDay(6,this)"><span class="dp-day">שבת</span><span class="dp-num">14</span></div>
+</div>
+
+<!-- ══ CAL WRAP ══ -->
+<div id="cal-wrap">
+
+  <!-- ── WEEKLY VIEW ── -->
+  <div id="week-view">
+
+    <!-- Day headers (fixed) -->
+    <div id="day-headers">
+      <div class="dh-gutter"></div>
+      <!-- filled by JS -->
+    </div>
+
+    <!-- Scrollable body + detail panel -->
+    <div id="week-body">
+      <div id="week-scroll">
+        <div id="week-inner">
+          <div class="time-gutter" id="time-gutter"></div>
+          <div id="week-grid"></div>
+        </div>
+      </div>
+
+      <!-- Detail panel -->
+      <div id="detail-panel">
+      <div class="dpp-header">
+        <div>
+          <div class="dpp-name" id="dpp-name">—</div>
+          <div id="dpp-type-chip"></div>
+        </div>
+        <span class="dpp-close" onclick="closeDetail()">✕</span>
+      </div>
+      <div class="dpp-body">
+        <div class="dpp-row">
+          <span class="dpp-label">שעות</span>
+          <span class="dpp-value" id="dpp-time">—</span>
+        </div>
+        <div class="dpp-row">
+          <span class="dpp-label">משך</span>
+          <span class="dpp-value" id="dpp-dur">—</span>
+        </div>
+        <div class="dpp-row">
+          <span class="dpp-label">חזרה</span>
+          <div class="dpp-days" id="dpp-days"></div>
+        </div>
+        <div class="dpp-row">
+          <span class="dpp-label">הערות</span>
+          <span class="dpp-value" id="dpp-notes" style="color:#4a5270">—</span>
+        </div>
+      </div>
+      <div class="dpp-actions">
+        <button class="dpp-btn dpp-btn-edit">עריכה</button>
+        <button class="dpp-btn dpp-btn-del">מחיקה</button>
+      </div>
+    </div>
+
+    </div><!-- /week-body -->
+  </div><!-- /week-view -->
+
+  <!-- ── DAILY VIEW ── -->
+  <div id="daily-view">
+    <div id="daily-scroll">
+      <div id="daily-inner">
+        <div class="daily-gutter" id="daily-gutter"></div>
+        <div class="daily-col-body" id="daily-col"></div>
+      </div>
+    </div>
+
+    <!-- Detail panel (reused) -->
+  </div>
+
+</div>
+
+<!-- ══ ADD EVENT MODAL ══ -->
+<div id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">הוסף ארוע חדש</span>
+      <span class="modal-close" onclick="closeModal()">✕</span>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <span class="form-label">שם הארוע</span>
+        <input class="form-input" type="text" placeholder="לדוגמה: אימון קרבי, תדריך מוצב...">
+      </div>
+      <div class="form-row">
+        <span class="form-label">סוג</span>
+        <div class="type-grid" id="type-grid">
+          <span class="type-opt guard on"     data-t="guard"     onclick="selectType(this)" style="background:#2d0a0a;color:#fca5a5;border-color:#7f1d1d">כוננות</span>
+          <span class="type-opt formation on" data-t="formation" onclick="selectType(this)" style="background:#0a1f10;color:#4ade80;border-color:#14532d">מסדר</span>
+          <span class="type-opt training"     data-t="training"  onclick="selectType(this)" style="background:#0a1428;color:#93c5fd;border-color:#1e3a5f">אימון</span>
+          <span class="type-opt briefing"     data-t="briefing"  onclick="selectType(this)" style="background:#160a2e;color:#c4b5fd;border-color:#3b0764">תדריך</span>
+          <span class="type-opt meal"         data-t="meal"      onclick="selectType(this)" style="background:#021a18;color:#5eead4;border-color:#042f2e">ארוחה</span>
+          <span class="type-opt patrol"       data-t="patrol"    onclick="selectType(this)" style="background:#1f1200;color:#fbbf24;border-color:#78350f">סיור</span>
+        </div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-row">
+          <span class="form-label">שעת התחלה</span>
+          <input class="form-input" type="time" value="06:00">
+        </div>
+        <div class="form-row">
+          <span class="form-label">שעת סיום</span>
+          <input class="form-input" type="time" value="07:00">
+        </div>
+      </div>
+      <div class="form-row">
+        <span class="form-label">ימי חזרה</span>
+        <div class="days-grid" id="days-grid">
+          <span class="day-opt selected" data-d="0">א׳</span>
+          <span class="day-opt selected" data-d="1">ב׳</span>
+          <span class="day-opt selected" data-d="2">ג׳</span>
+          <span class="day-opt selected" data-d="3">ד׳</span>
+          <span class="day-opt selected" data-d="4">ה׳</span>
+          <span class="day-opt" data-d="5">ו׳</span>
+          <span class="day-opt" data-d="6">ש׳</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <span class="form-label">הערות (אופציונלי)</span>
+        <input class="form-input" type="text" placeholder="מיקום, ציוד נדרש...">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">ביטול</button>
+      <button class="btn-save">שמירה</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Constants ──
+  const HOUR_H_WEEK  = 48;   // px per hour — weekly
+  const HOUR_H_DAILY = 72;   // px per hour — daily
+  const START_H = 5;          // 05:00
+  const END_H   = 24;         // 24:00
+  const TOTAL_H = END_H - START_H;
+
+  const DAYS_HE   = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+  const DAYS_SH   = ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'];
+  const DATE_NUMS = [8, 9, 10, 11, 12, 13, 14];
+  const TODAY_IDX = 5; // שישי March 13
+
+  const TYPES = {
+    guard:    { label: 'כוננות', color: '#ef4444', bg: '#2d0a0a', text: '#fca5a5' },
+    formation:{ label: 'מסדר',   color: '#22c55e', bg: '#0a1f10', text: '#4ade80' },
+    training: { label: 'אימון',  color: '#3b82f6', bg: '#0a1428', text: '#93c5fd' },
+    briefing: { label: 'תדריך', color: '#a855f7', bg: '#160a2e', text: '#c4b5fd' },
+    meal:     { label: 'ארוחה', color: '#14b8a6', bg: '#021a18', text: '#5eead4' },
+    patrol:   { label: 'סיור',  color: '#f59e0b', bg: '#1f1200', text: '#fbbf24' },
+  };
+
+  const NOTES = {
+    1:  'ציוד מלא · נקודת ריכוז שער ראשי',
+    5:  'אימון נשק, כדאיות אישית',
+    6:  'חדר מצב · נוכחות חובה',
+    7:  'מסלול ב׳ · נשק חם',
+    10: 'מגרש אחורי',
+    13: 'חדר פ"מ',
+    14: 'כיתת כוננות · ציוד מלא',
+  };
+
+  // total = soldiers required, assigned = currently assigned
+  // conflictDays = days where this event temporally overlaps with another and shares soldiers
+  let EVENTS = [
+    { id: 1,  name: 'כוננות עם שחר',  type: 'guard',    sH: 5,  sM: 30, eH: 6,  eM: 30, days: [0,1,2,3,4,5,6], total: 3,  assigned: 3,  conflictDays: [] },
+    { id: 2,  name: 'מסדר בוקר',      type: 'formation',sH: 6,  sM: 30, eH: 7,  eM: 0,  days: [0,1,2,3,4,5,6], total: 14, assigned: 14, conflictDays: [] },
+    { id: 3,  name: 'ארוחת בוקר',     type: 'meal',     sH: 7,  sM: 0,  eH: 7,  eM: 45, days: [0,1,2,3,4,5,6], total: 14, assigned: 14, conflictDays: [] },
+    { id: 4,  name: 'תדריך יומי',     type: 'briefing', sH: 8,  sM: 0,  eH: 8,  eM: 45, days: [0,1,2,3,4,5],   total: 14, assigned: 14, conflictDays: [] },
+    { id: 5,  name: 'אימון קרבי',     type: 'training', sH: 9,  sM: 0,  eH: 11, eM: 0,  days: [0,1,3,4],       total: 8,  assigned: 7,  conflictDays: [] },
+    { id: 6,  name: 'תדריך מוצב',     type: 'briefing', sH: 9,  sM: 0,  eH: 11, eM: 0,  days: [2,5],           total: 14, assigned: 14, conflictDays: [] },
+    // סיור ו-אימון צוות חופפים ביום ב' (day 1): 11-15 vs 14-16 → אחד חייל שנמצא בשניהם
+    { id: 7,  name: 'סיור',            type: 'patrol',   sH: 11, sM: 0,  eH: 15, eM: 0,  days: [1,3,5],         total: 4,  assigned: 3,  conflictDays: [1] },
+    { id: 8,  name: 'אימון אישי',     type: 'training', sH: 11, sM: 0,  eH: 13, eM: 0,  days: [0,2,4],         total: 8,  assigned: 8,  conflictDays: [] },
+    // ארוחת צהריים חופפת עם סיור בזמן — חיילים שונים (צוות סיור אוכל בשטח)
+    { id: 9,  name: 'ארוחת צהריים',  type: 'meal',     sH: 13, sM: 0,  eH: 13, eM: 45, days: [0,1,2,3,4,5,6], total: 10, assigned: 10, conflictDays: [] },
+    { id: 10, name: 'אימון צוות',     type: 'training', sH: 14, sM: 0,  eH: 16, eM: 0,  days: [0,1,4],         total: 8,  assigned: 8,  conflictDays: [1] },
+    { id: 11, name: 'מסדר ערב',       type: 'formation',sH: 17, sM: 0,  eH: 17, eM: 30, days: [0,1,2,3,4,5,6], total: 14, assigned: 13, conflictDays: [] },
+    { id: 12, name: 'ארוחת ערב',      type: 'meal',     sH: 18, sM: 0,  eH: 18, eM: 45, days: [0,1,2,3,4,5,6], total: 14, assigned: 14, conflictDays: [] },
+    { id: 13, name: 'תדריך מחלקה',    type: 'briefing', sH: 19, sM: 0,  eH: 20, eM: 0,  days: [0,2,4],         total: 8,  assigned: 6,  conflictDays: [] },
+    { id: 14, name: 'כוננות ראשונה',  type: 'guard',    sH: 20, sM: 0,  eH: 24, eM: 0,  days: [0,1,2,3,4,5,6], total: 4,  assigned: 4,  conflictDays: [] },
+  ];
+
+  let activeFilters = new Set(['guard','formation','training','briefing','meal','patrol']);
+  let currentView = 'weekly';
+  let selectedDayIdx = TODAY_IDX;
+
+  // ── Helpers ──
+  function pad(n) { return String(n).padStart(2,'0'); }
+  function fmt(h,m) { return `${pad(h)}:${pad(m)}`; }
+  function toY(h, m, hourH) { return ((h - START_H) + m/60) * hourH; }
+  function durMin(e) { return (e.eH - e.sH)*60 + (e.eM - e.sM); }
+
+  // ── Build time gutter ──
+  function buildGutter(el, hourH) {
+    let html = '';
+    for (let h = START_H; h < END_H; h++) {
+      html += `<div class="time-tick" style="height:${hourH}px">${pad(h)}:00</div>`;
+    }
+    el.innerHTML = html;
+  }
+
+  // ── Build day headers ──
+  function buildDayHeaders() {
+    const bar = document.getElementById('day-headers');
+    let html = '<div class="dh-gutter"></div>';
+    for (let d = 0; d < 7; d++) {
+      html += `<div class="dh-day${d===TODAY_IDX?' today':''}">
+        <span class="dh-name">${DAYS_HE[d]}</span>
+        <span class="dh-date">${DATE_NUMS[d]}</span>
+      </div>`;
+    }
+    bar.innerHTML = html;
+  }
+
+  // ── Collision layout: split overlapping events into columns ──
+  function layoutEvents(evs, hourH) {
+    // sort by start time
+    const sorted = [...evs].sort((a,b) => (a.sH*60+a.sM) - (b.sH*60+b.sM));
+    const slots = []; // array of [end_min] per column
+    const cols  = [];
+    for (const ev of sorted) {
+      const s = ev.sH*60+ev.sM, e = ev.eH*60+ev.eM;
+      let col = slots.findIndex(end => end <= s);
+      if (col === -1) { col = slots.length; slots.push(0); }
+      slots[col] = e;
+      cols.push({ ev, col });
+    }
+    const numCols = slots.length || 1;
+    return cols.map(({ ev, col }) => ({
+      ev,
+      top: toY(ev.sH, ev.sM, hourH),
+      height: Math.max((durMin(ev)/60)*hourH - 2, 16),
+      left: col === 0 ? 3 : 3 + (col/numCols)*95 + '%',
+      right: col === numCols-1 ? 3 : ((numCols-col-1)/numCols)*95 + '%',
+      width: numCols > 1 ? `calc(${100/numCols}% - 6px)` : null,
+      leftPx: numCols > 1 ? null : null,
+    }));
+  }
+
+  // ── Render event block ──
+  function evHtml(ev, top, height, leftStyle, rightStyle, widthStyle, hourH) {
+    const showTime = height >= 28;
+    const showName = height >= 16;
+    const l = widthStyle
+      ? `style="top:${top}px;height:${height}px;left:${leftStyle};width:${widthStyle};right:auto"`
+      : `style="top:${top}px;height:${height}px"`;
+    return `<div class="ev ${ev.type}" ${l} onclick="showDetail(${ev.id})">
+      ${showName ? `<div class="ev-name">${ev.name}</div>` : ''}
+      ${showTime ? `<div class="ev-time">${fmt(ev.sH,ev.sM)}–${fmt(ev.eH,ev.eM)}</div>` : ''}
+    </div>`;
+  }
+
+  // ── Build weekly grid ──
+  function buildWeekGrid() {
+    const grid = document.getElementById('week-grid');
+    const hh = HOUR_H_WEEK;
+    let html = '';
+
+    for (let d = 0; d < 7; d++) {
+      html += `<div class="day-col${d===TODAY_IDX?' today':''}">`;
+      html += `<div class="day-col-body" style="height:${TOTAL_H*hh}px">`;
+
+      // Hour lines
+      for (let h = 0; h < TOTAL_H; h++) {
+        html += `<div class="hour-line" style="top:${h*hh}px"></div>`;
+        html += `<div class="hour-line half-hour" style="top:${h*hh + hh/2}px"></div>`;
+      }
+
+      // Events (filtered)
+      const dayEvs = EVENTS.filter(e => e.days.includes(d) && activeFilters.has(e.type));
+      const laid = layoutEventsSimple(dayEvs, hh);
+      for (const { ev, top, height, leftPct, widthPct } of laid) {
+        const showTime = height >= 28;
+        const showAtt  = height >= 36 && ev.total;
+        const hasConflict = ev.conflictDays.includes(d);
+        const attCls = hasConflict ? 'att-conf' : ev.assigned >= ev.total ? 'att-full' : 'att-part';
+        const attTxt = hasConflict
+          ? `⚠ חפיפה`
+          : ev.assigned >= ev.total ? `✓ ${ev.total}` : `${ev.assigned}/${ev.total}`;
+        const l = `style="top:${top}px;height:${height}px;left:calc(${leftPct}% + 3px);width:calc(${widthPct}% - 6px);right:auto"`;
+        html += `<div class="ev ${ev.type}" ${l} onclick="showDetail(${ev.id},${d})">
+          <div class="ev-name">${ev.name}</div>
+          ${showTime ? `<div class="ev-time">${fmt(ev.sH,ev.sM)}–${fmt(ev.eH,ev.eM)}</div>` : ''}
+          ${showAtt  ? `<div class="ev-att ${attCls}">${attTxt}</div>` : ''}
+        </div>`;
+      }
+
+      // Now line (today)
+      if (d === TODAY_IDX) {
+        const nowTop = toY(10, 30, hh); // mock: 10:30
+        html += `<div class="now-line" style="top:${nowTop}px"><div class="now-dot"></div></div>`;
+      }
+
+      html += '</div></div>';
+    }
+
+    grid.innerHTML = html;
+    grid.style.height = (TOTAL_H * hh) + 'px';
+  }
+
+  // Simplified collision: returns leftPct, widthPct
+  function layoutEventsSimple(evs, hourH) {
+    const sorted = [...evs].sort((a,b) => (a.sH*60+a.sM)-(b.sH*60+b.sM));
+    const colEnds = [];
+    const result  = [];
+    for (const ev of sorted) {
+      const s = ev.sH*60+ev.sM, e = ev.eH*60+ev.eM;
+      let col = colEnds.findIndex(end => end <= s);
+      if (col === -1) { col = colEnds.length; colEnds.push(0); }
+      colEnds[col] = e;
+      result.push({ ev, col, top: toY(ev.sH,ev.sM,hourH), height: Math.max((durMin(ev)/60)*hourH-2, 16) });
+    }
+    const nCols = colEnds.length || 1;
+    return result.map(r => ({ ...r, leftPct: (r.col/nCols)*100, widthPct: 100/nCols }));
+  }
+
+  // ── Build daily grid ──
+  function buildDailyGrid(dayIdx) {
+    const hh = HOUR_H_DAILY;
+    const gutter = document.getElementById('daily-gutter');
+    const col    = document.getElementById('daily-col');
+
+    buildGutter(gutter, hh);
+
+    const totalH = TOTAL_H * hh;
+    let html = '';
+    col.style.position = 'relative';
+    col.style.height = totalH + 'px';
+
+    // Hour lines
+    for (let h = 0; h < TOTAL_H; h++) {
+      html += `<div class="hour-line" style="top:${h*hh}px;position:absolute;left:0;right:0"></div>`;
+      html += `<div class="hour-line half-hour" style="top:${h*hh+hh/2}px;position:absolute;left:0;right:0"></div>`;
+    }
+
+    // Events
+    const dayEvs = EVENTS.filter(e => e.days.includes(dayIdx) && activeFilters.has(e.type));
+    const laid = layoutEventsSimple(dayEvs, hh);
+    for (const { ev, top, height, leftPct, widthPct } of laid) {
+      const showTime = height >= 40;
+      const showAtt  = height >= 50 && ev.total;
+      const hasConflict = ev.conflictDays.includes(dayIdx);
+      const attCls = hasConflict ? 'att-conf' : ev.assigned >= ev.total ? 'att-full' : 'att-part';
+      const attTxt = hasConflict ? `⚠ חפיפה` : ev.assigned >= ev.total ? `✓ ${ev.total}` : `${ev.assigned}/${ev.total}`;
+      html += `<div class="ev ${ev.type}" style="top:${top}px;height:${height}px;left:calc(${leftPct}% + 6px);width:calc(${widthPct}% - 12px);right:auto;border-radius:7px;padding:6px 10px 5px 8px" onclick="showDetail(${ev.id},${dayIdx})">
+        <div class="ev-name" style="font-size:12px">${ev.name}</div>
+        ${showTime ? `<div class="ev-time" style="font-size:10px;direction:ltr;text-align:right;unicode-bidi:isolate">${fmt(ev.sH,ev.sM)} – ${fmt(ev.eH,ev.eM)} · ${durMin(ev)} ד׳</div>` : ''}
+        ${showAtt  ? `<div class="ev-att ${attCls}">${attTxt}</div>` : ''}
+      </div>`;
+    }
+
+    // Now line (today)
+    if (dayIdx === TODAY_IDX) {
+      const nowTop = toY(10, 30, hh);
+      html += `<div class="now-line" style="top:${nowTop}px;position:absolute;left:0;right:0"><div class="now-dot"></div></div>`;
+    }
+
+    col.innerHTML = html;
+  }
+
+  // ── Show detail ──
+  function showDetail(id, dayIdx) {
+    const ev = EVENTS.find(e => e.id === id);
+    if (!ev) return;
+    const t = TYPES[ev.type];
+    const hasConflict = ev.conflictDays.includes(dayIdx);
+
+    document.getElementById('dpp-name').textContent = ev.name;
+    document.getElementById('dpp-type-chip').innerHTML =
+      `<span class="dpp-type" style="background:${t.bg};color:${t.text};border:1px solid ${t.color}">${t.label}</span>`
+      + (hasConflict ? `<span class="dpp-type" style="background:#3b0d0d;color:#fca5a5;border:1px solid #7f1d1d;margin-right:4px">⚠ חפיפת חיילים</span>` : '');
+
+    // force ltr on time text to prevent bidi reversal
+    document.getElementById('dpp-time').innerHTML =
+      `<span dir="ltr">${fmt(ev.sH,ev.sM)} – ${fmt(ev.eH,ev.eM)}</span>`;
+
+    const dm = durMin(ev);
+    document.getElementById('dpp-dur').textContent = dm >= 60
+      ? `${Math.floor(dm/60)} שעות${dm%60 ? ' ו-'+(dm%60)+' דקות' : ''}`.trim()
+      : `${dm} דקות`;
+
+    // Attendance row
+    const attEl = document.getElementById('dpp-att');
+    if (attEl && ev.total) {
+      const pct = Math.round(ev.assigned / ev.total * 100);
+      const cls = hasConflict ? '#ef4444' : ev.assigned >= ev.total ? '#22c55e' : '#f59e0b';
+      attEl.innerHTML = `<span dir="ltr" style="color:${cls};font-weight:700">${ev.assigned}/${ev.total}</span> <span style="color:#4a5270;font-size:11px">(${pct}%)</span>`;
+    }
+
+    document.getElementById('dpp-days').innerHTML =
+      DAYS_HE.map((name,i) =>
+        `<span class="dpp-day-pill${ev.days.includes(i)?' active':''}">${name}</span>`
+      ).join('');
+    document.getElementById('dpp-notes').textContent = NOTES[id] || '—';
+    document.getElementById('detail-panel').classList.add('open');
+  }
+
+  function closeDetail() {
+    document.getElementById('detail-panel').classList.remove('open');
+  }
+
+  // ── View toggle ──
+  function setView(v) {
+    currentView = v;
+    document.getElementById('btn-weekly').classList.toggle('active', v === 'weekly');
+    document.getElementById('btn-daily').classList.toggle('active', v === 'daily');
+    document.getElementById('week-view').style.display   = v === 'weekly' ? 'flex' : 'none';
+    document.getElementById('daily-view').style.display  = v === 'daily'  ? 'flex' : 'none';
+    document.getElementById('date-strip').style.display  = v === 'daily'  ? 'flex' : 'none';
+    if (v === 'daily') buildDailyGrid(selectedDayIdx);
+  }
+
+  // ── Day select (daily) ──
+  function selectDay(idx, el) {
+    selectedDayIdx = idx;
+    document.querySelectorAll('.date-pill').forEach(p => p.classList.remove('selected'));
+    el.classList.add('selected');
+    buildDailyGrid(idx);
+  }
+
+  // ── Filters ──
+  function toggleFilter(chip) {
+    const type = chip.dataset.type;
+    if (type === 'all') {
+      const allOn = activeFilters.size === Object.keys(TYPES).length;
+      if (allOn) {
+        activeFilters.clear();
+        document.querySelectorAll('.cat-chip:not(.all)').forEach(c => { c.classList.remove('on'); c.classList.add('off'); });
+        chip.classList.remove('on'); chip.classList.add('off');
+      } else {
+        activeFilters = new Set(Object.keys(TYPES));
+        document.querySelectorAll('.cat-chip:not(.all)').forEach(c => { c.classList.remove('off'); c.classList.add('on'); });
+        chip.classList.remove('off'); chip.classList.add('on');
+      }
+    } else {
+      if (activeFilters.has(type)) { activeFilters.delete(type); chip.classList.remove('on'); chip.classList.add('off'); }
+      else                         { activeFilters.add(type);    chip.classList.remove('off'); chip.classList.add('on'); }
+      const allChip = document.querySelector('.cat-chip.all');
+      if (activeFilters.size === Object.keys(TYPES).length) { allChip.classList.remove('off'); allChip.classList.add('on'); }
+      else { allChip.classList.remove('on'); allChip.classList.add('off'); }
+    }
+    if (currentView === 'weekly') buildWeekGrid();
+    else buildDailyGrid(selectedDayIdx);
+  }
+
+  // ── Week nav ──
+  function shiftWeek(dir) {
+    // visual only
+    document.getElementById('week-label').textContent =
+      dir > 0 ? 'שבוע 11 · מרץ 2026' : 'שבוע 9 · מרץ 2026';
+  }
+
+  // ── Modal ──
+  function openModal() {
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+  function closeModal(e) {
+    if (!e || e.target === document.getElementById('modal-overlay') || !e.target.closest) {
+      document.getElementById('modal-overlay').classList.remove('open');
+    }
+  }
+  function selectType(el) {
+    document.querySelectorAll('#type-grid .type-opt').forEach(t => t.style.opacity = '0.45');
+    el.style.opacity = '1';
+  }
+  document.querySelectorAll('#days-grid .day-opt').forEach(btn => {
+    btn.onclick = () => btn.classList.toggle('selected');
+  });
+
+  // ── Init ──
+  buildGutter(document.getElementById('time-gutter'), HOUR_H_WEEK);
+  buildDayHeaders();
+  buildWeekGrid();
+
+  // Scroll to 05:30 on load
+  setTimeout(() => {
+    document.getElementById('week-scroll').scrollTop = HOUR_H_WEEK * 0.4;
+  }, 50);
+</script>
+</body>
+</html>
