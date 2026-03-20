@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common'
-import { db, soldiers, eq } from '@battalion/db'
+import { SoldiersRepository } from './soldiers.repository'
 
 @Injectable()
 export class SoldiersService {
+  constructor(private readonly repo: SoldiersRepository) {}
+
   list(companyId: string) {
-    return db.select().from(soldiers).where(eq(soldiers.companyId, companyId))
+    return this.repo.list(companyId)
   }
 }

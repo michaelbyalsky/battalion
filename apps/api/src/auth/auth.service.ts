@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException, NotFoundException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
-import { db, soldiers, companies, eq } from '@battalion/db'
+import { AuthRepository } from './auth.repository'
 
 // OTP whitelist for dev/staging
 const DEV_PHONES = ['+972500000001', '+972500000002', '+972500000003']
@@ -8,10 +8,13 @@ const DEV_OTP = '123456'
 
 @Injectable()
 export class AuthService {
-  constructor(private jwt: JwtService) {}
+  constructor(
+    private readonly jwt: JwtService,
+    private readonly repo: AuthRepository,
+  ) {}
 
   async requestOtp(phone: string): Promise<{ ok: boolean }> {
-    const soldier = await db.query.soldiers.findFirst({ where: eq(soldiers.phone, phone) })
+    const soldier = await this.repo.findSoldierByPhone(phone)
     if (!soldier) throw new NotFoundException('Phone not registered')
 
     if (DEV_PHONES.includes(phone)) {
@@ -24,20 +27,20 @@ export class AuthService {
   }
 
   async verifyOtp(phone: string, code: string): Promise<{ accessToken: string; refreshToken: string }> {
-    const soldier = await db.query.soldiers.findFirst({ where: eq(soldiers.phone, phone) })
+    const soldier = await this.repo.findSoldierByPhone(phone)
     if (!soldier) throw new UnauthorizedException()
 
     const isValid = DEV_PHONES.includes(phone) ? code === DEV_OTP : false // TODO: Redis OTP check
     if (!isValid) throw new UnauthorizedException('Invalid OTP')
 
-    const [company] = await db.select().from(companies).where(eq(companies.id, soldier.companyId))
+    const company = await this.repo.findCompanyById(soldier.companyId)
     if (!company) throw new UnauthorizedException('Company not found')
 
     const payload = {
       sub: soldier.id,
       battalion_id: company.battalionId,
       company_id: soldier.companyId,
-      battalion_scope: company.type === 'support',  // support company → battalion-wide read
+      battalion_scope: company.type === 'support',
       role: soldier.role,
     }
     const accessToken = this.jwt.sign(payload)
