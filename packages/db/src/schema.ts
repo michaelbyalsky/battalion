@@ -153,12 +153,18 @@ export const alerts = pgTable('alerts', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })
 
-// ── Refresh Tokens ────────────────────────────────────────────────────────────
+// ── Sessions ──────────────────────────────────────────────────────────────────
+// One row per active login. jti matches the JWT jti claim.
+// Deleted on logout → refresh token is effectively revoked.
 
-export const refreshTokens = pgTable('refresh_tokens', {
+export const sessions = pgTable('sessions', {
   id: uuid('id').primaryKey().defaultRandom(),
-  soldierId: uuid('soldier_id').notNull().references(() => soldiers.id),
-  token: text('token').notNull().unique(),
-  expiresAt: timestamp('expires_at').notNull(),
+  jti: text('jti').notNull().unique(),
+  soldierId: uuid('soldier_id').notNull().references(() => soldiers.id, { onDelete: 'cascade' }),
+  companyId: uuid('company_id').notNull().references(() => companies.id, { onDelete: 'cascade' }),
+  ip: text('ip'),
+  userAgent: text('user_agent'),
+  deviceName: text('device_name'),
+  lastUsed: timestamp('last_used').defaultNow().notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })

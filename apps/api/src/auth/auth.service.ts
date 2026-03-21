@@ -1,19 +1,33 @@
-import { Inject, Injectable, UnauthorizedException, NotFoundException, HttpException, HttpStatus } from '@nestjs/common'
+import { Inject, Injectable, UnauthorizedException, NotFoundException, ForbiddenException, HttpException, HttpStatus } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { randomUUID } from 'crypto'
 import type { Redis } from 'ioredis'
 import { AuthRepository } from './auth.repository'
+import { SessionsRepository } from './sessions.repository'
 import { TwilioService } from '../twilio/twilio.service'
 import { REDIS_CLIENT } from '../redis/redis.module'
+import type { JwtPayload } from '@battalion/types'
 
-const OTP_COOLDOWN_TTL = 60      // seconds between request-otp calls
+const OTP_COOLDOWN_TTL = 60       // seconds between request-otp calls per phone
 const REFRESH_TOKEN_TTL = 2592000 // 30 days in seconds
+
+function parseDeviceName(userAgent?: string): string {
+  if (!userAgent) return 'Unknown device'
+  if (/iPhone/.test(userAgent)) return 'iPhone'
+  if (/iPad/.test(userAgent)) return 'iPad'
+  if (/Android/.test(userAgent)) return 'Android'
+  if (/Windows/.test(userAgent)) return 'Windows'
+  if (/Macintosh/.test(userAgent)) return 'Mac'
+  if (/Linux/.test(userAgent)) return 'Linux'
+  return 'Unknown device'
+}
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwt: JwtService,
     private readonly repo: AuthRepository,
+    private readonly sessionsRepo: SessionsRepository,
     private readonly twilio: TwilioService,
     @Inject(REDIS_CLIENT) private readonly redis: Redis,
   ) {}
@@ -31,7 +45,7 @@ export class AuthService {
     return { ok: true }
   }
 
-  async verifyOtp(phone: string, code: string) {
+  async verifyOtp(phone: string, code: string, meta: { ip?: string; userAgent?: string }) {
     const soldier = await this.repo.findSoldierByPhone(phone)
     if (!soldier) throw new UnauthorizedException()
 
@@ -51,21 +65,40 @@ export class AuthService {
       role: soldier.role,
     }
     const accessToken = this.jwt.sign(payload)
-    const refreshToken = this.jwt.sign(payload, { expiresIn: '30d' })
+    const refreshToken = this.jwt.sign(payload, { expiresIn: `${REFRESH_TOKEN_TTL}s` })
 
-    await this.redis.set(`refresh:${jti}`, soldier.id, 'EX', REFRESH_TOKEN_TTL)
+    await this.sessionsRepo.create({
+      jti,
+      soldierId: soldier.id,
+      companyId: soldier.companyId,
+      ip: meta.ip,
+      userAgent: meta.userAgent,
+      deviceName: parseDeviceName(meta.userAgent),
+    })
 
     return { accessToken, refreshToken, soldier }
   }
 
   async logout(refreshToken: string): Promise<void> {
     try {
-      const payload = this.jwt.decode(refreshToken) as { jti?: string } | null
+      const payload = this.jwt.decode(refreshToken) as JwtPayload | null
       if (payload?.jti) {
-        await this.redis.del(`refresh:${payload.jti}`)
+        await this.sessionsRepo.deleteByJti(payload.jti)
       }
     } catch {
-      // token malformed — nothing to revoke, proceed with cookie clearing
+      // malformed token — nothing to revoke
     }
+  }
+
+  async listSessions(soldierId: string) {
+    return this.sessionsRepo.listBySoldier(soldierId)
+  }
+
+  async revokeSession(soldierId: string, jti: string): Promise<{ ok: boolean }> {
+    const session = await this.sessionsRepo.findByJti(jti)
+    if (!session) throw new NotFoundException('Session not found')
+    if (session.soldierId !== soldierId) throw new ForbiddenException()
+    await this.sessionsRepo.deleteByJti(jti)
+    return { ok: true }
   }
 }

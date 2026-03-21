@@ -120,11 +120,24 @@ export interface Alert {
 
 export interface JwtPayload {
   sub: string
+  jti: string
   battalion_id: string
   company_id: string        // always present — soldier's own company
   battalion_scope: boolean  // true for support company soldiers → battalion-wide read access
   role: Role
   exp: number
+}
+
+export interface Session {
+  id: string
+  jti: string
+  soldierId: string
+  companyId: string
+  ip: string | null
+  userAgent: string | null
+  deviceName: string | null
+  lastUsed: string
+  createdAt: string
 }
 
 export interface RequestOtpDto {
